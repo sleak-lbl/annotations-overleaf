@@ -1,0 +1,51 @@
+\section{Putting it all together}
+The learning curve for using the underlying SQL and linked data technologies
+itself presents an obstacle to publishing and using log data, but most use
+cases for publishers, annotators and analysts are based on only a few queries.
+To mitigate this obstacle we provide tools that guide users through common
+tasks without requiring direct use of SQL or SPARQL. This does not preclude
+direct use of the underlying technology by those comfortable with it.
+
+Finally, we present case studies on systems at different sites illustrating the mechanism,
+benefit, and general applicability of the tools and schema presented here. Cases include:
+
+\paragraph{User investigation of system events impacting job performance} Application
+performance can be impacted by events which are apparent in log data but not exposed to 
+users or not apparent to someone without appropriate domain knowledge to interpret the
+log data. Our framework enables investigation by users or support staff by exposing 
+expert translations of significant occurrences without necessarily exposing logs beyond
+their normal security and privacy domain. In addition, the framework enables users to
+identify and specify to support staff relevant slices of logs they cannot directly 
+access, reducing the effort required by support staff to aid in such questions.
+
+In this example, we show how a user can investigate underlying reasons for and
+occurrences of performance variation issues by integrated access of expert annotations 
+of CPU throttling events, link degrades, and memory errors which occur in disparate 
+Cray logs in conjunction with historic job data.
+
+\paragraph{Administrator event investigation}
+The historical state of the system includes not only events captured by the logs, but
+human-invoked actions as well, such as DIMM replacement, software upgrades, and cable reseating.
+Our annotation system enables labeling and search of both human-defined and system-defined events
+in a consistent way, and the return of such events in a format suitable for plotting or additional analysis.
+
+This example shows how the investigation of component faults and resolution can be facilitated by our
+framework. Sequences of failures followed by manual resolution action are easily discoverable and visualized
+in a timeline. The easy determination of the time between problem onset and resolution is useful for
+reporting of the system impact of particular component problems. Finally, long term analysis is used to
+detect components (e.g., nodes) which indicate more faults over time, regardless of replacement, which can indicate that
+the root cause of problems is environmental (e.g., temperature) rather than component-based.
+
+A related example demonstrates characterization of the impacts of
+events which are resolved by the system itself: network failure events which should be resolved by the automatic recalculation
+of network routes. Using our framework on production and
+fault injection data, we show how the timescales of impact are easily discovered, as well as the discovery
+of events for which successful rerouting did not occur. Identification of these occurrences also then facilitates
+direction to regions of the logs for more in-depth analysis as to the circumstances of the failure.
+
+
+
+
+
+
+
