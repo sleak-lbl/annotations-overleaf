@@ -1,0 +1,90 @@
+\section{Introduction}
+\label{s:intro}
+
+TODO introduce the paper. Brief context, and what the paper aims to do
+
+...
+
+% TOC, in a why-its-here format rather than where-it-is:
+Extracting useful insights from the diverse and scattered assortment of systems 
+logs, monitoring tool outputs and human-provided commentary is not a new 
+problem, so we begin in section~\ref{s:context} by exploring the context of the
+problem to understand why it has not been already solved. From this we infer 
+the requirements of a solution, outlined in section~\ref{s:requirements}. Our 
+approach addresses these requirements and is described in detail in 
+section~\ref{s:solution}, with some illustrative case studies in 
+~\ref{s:examples}.
+
+
+\section{Context}
+\label{s:context}
+
+To illustrate the opportunities and challenges posed by the assortment of 
+log-and-related data, consider NERSC:
+
+NERSC's Cori system has 2388 Xeon nodes, 9688 Xeon Phi nodes, a host of service 
+nodes providing I/O forwarding, a burst-buffer filesystem, Lustre networking and
+system management, and an Aries high-speed network in a Dragonfly topology. Cori
+has a large external Lustre filesystem also cross-mounted on Edison - another 
+large Cray system at NERSC - via Infiniband. It has external login nodes and 
+shares GPFS filesystems with other NERSC servers. There are air and water cooling
+components and UPS power circuits. Along with Cray system software and 
+programming environments, Cori runs multiple compilers and MPI stacks and
+hundreds of software packages. Its 7,000 users run tens of thousands of jobs per 
+day via the Slurm batch scheduler.
+
+NERSC is a large center with multiple clusters and storage systems - including 
+bleeding-edge technologies and in the order of 100 staff members supporting 
+various aspects of the facility and the several hundred projects and several 
+thousand users it supports.
+
+The scale and complexity of facilities such as NERSC continues to increase as 
+we address the challenges of providing exascale systems and the challenges that 
+will follow it.
+
+With increasing scale and complexity, the ability to identify and characterize 
+faults leading to fails becomes more important, simply because scale and 
+complexity increase the probability of a fault impacting the facility's ability
+to support its scientific workload. 
+
+Data such as system logs, environmental metrics, job history, filesystem state,
+outage notices and user reports are already routinely collected, but the 
+extraction of useful insights from these requires a customized solution for 
+each investigation and is limited by several constraints:
+
+\begin{itemize}
+\item Data is collected by different people in different security domains - for
+      example, system logs for each subsystem are typically available only to 
+      the system administrators for that subsystem. 
+\item Data is collected in different formats, usually based on the output format
+      of specific data sources and the needs of a specific investigation.
+\item Data is stored in different places with different access mechanisms - flat 
+      text files, binary formats such as HDF5,~\textcolor{red}{cite} SQL and 
+      NoSQL databases, JSON via a RESTful interface, etc.
+\item Much of the collected data requires domain expertise to interpret, and the
+      variety of domains within HPC ensures that very few people have the 
+      capability of combining information from more than a few sources into a
+      broader insight about what the data implies.
+\item Users and staff are not necessarily aware of what data is being collected.
+      This doesn't imply communication problems within an organization: many 
+      collections are ad-hoc and for a specific purpose, and the effort required 
+      to make them suitable for wider use is not considered justified. Not all 
+      collections are by center staff - for example some advanced users keep
+      a database of performance of their regular workflows, information that 
+      could give early warning of system issues if the data was visible to 
+      center staff.
+\end{itemize}
+
+Furthermore, facilities having components in common could benefit from sharing 
+some log data - for example, diagnosis of a filesystem issue experienced by one 
+facility but not another might be aided by comparatively analyzing logs from 
+both facilities.
+
+\textcolor{red}{TODO} talk about the vagueness of failure reports, and 
+exploratory nature of investigations
+
+\textcolor{red}{TODO} so fundamentally the reason for why this has not been 
+solved is that the problem is difficult to even define, and he scattered nature
+of data makes it difficult to wrangle
+
+

@@ -1,0 +1,66 @@
+\section{Requirements for a Solution}
+\label{s:requirements}
+
+Key points:
+
+\begin{itemize}
+\item the diversity of available data must be allowed for
+\begin{itemize}
+\item coercing people to do their data collection in a particular format
+      or storage isn't going to work, because:
+      
+\begin{enumerate}
+\item if the ``blessed'' format requires reformatting from the data source
+      and does not benefit their investigation, they'll simply stop 
+      advertising that they have the data
+\item a ``blessed'' centralized storage requires someone to maintain it,
+      and this person (or group) must commit to maintaining support for 
+      data feeds over which they have no control. (How do they know that 
+      the data going in is in a useful format, at useful cadence, and
+      won't overwhelm the capacity of their system?)
+\end{enumerate}
+\end{itemize}
+
+\item the diversity of expertise must be allowed for, and taken advantage of.
+
+      ie, combining annotations from diverse experts with logs from diverse 
+      sources is important
+      
+\item ad-hoc investigation must be supported:
+\begin{itemize}
+\item people are going to do it anyway, might as well make good use of it
+\item ad-hoc investigators don't have the luxury of time to "clean" their 
+      data to make it useful for others without a specific motivating 
+      request that provides guidance and incentive
+      (eg: if I have collected a bunch of Slurm queue data, and my colleague 
+      asks "can you help me setup a feed of how jobs from group xyz are moving 
+      through the queue?", then I'll be inclined to munge my storage into a 
+      format supporting that query, but otherwise, I prefer to leave it in the 
+      format that is working for me and requires no extra effort from me)
+\end{itemize}
+
+\item people are time-constrained
+
+\item there is too much data from too many sources for anyone to keep track of
+
+\item data must be discoverable 
+
+\item case studies - not doing remote yet, that is in the larger architecture though
+
+\item not a generalized interface to slurm, baler, etc, for the moment we're putting things directly into sqlite
+
+\item (arch supports plugin interfaces)
+
+
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+

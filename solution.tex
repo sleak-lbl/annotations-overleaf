@@ -1,0 +1,197 @@
+\section{Our Approach}
+\label{s:solution}
+
+\begin{itemize}
+\item annotation schema
+\item discovery
+\item tools
+\end{itemize}
+
+The underlying reasons for why extracting useful insights from log- and 
+monitoring data are:
+\begin{itemize}
+\item The volume and diversity of the data
+\item that we don't know in advance what the question will be 
+\item time and effort
+\end{itemize}
+
+philosphy:
+ - don't try to solve the unsolvable: make it easy to publish and discover 
+   what is already known about collections
+       - eg leave the solution of local access constraints to 
+   the protagonists with local knowledge, 
+       - delay decisions about what format 
+   log data should be converted to until someone actually needs it in that format
+        - 
+ - make things easy: people's time is limited!
+ - decentralization
+ 
+ 
+ 
+Our solution integrates three contributions to address these requirements:
+\begin{enumerate}
+\item An RDF vocabulary for describing log and monitoring data collections
+      in terms of the subject being monitored, the time period covered,
+      the type and format of the data and details for accessing the data or
+      contacting its curator.
+      
+      The defining characteristic of a \emph{ConcreteLog} - that is, a 
+      specific file/stream/block-of-data being described - in the vocabulary
+      is that it has a \emph{subject} - ie what the log reports on - and 
+      that its entries have associated temporal information. This is a 
+      sufficiently broad definition to cover all log-like collections
+      while providing dimensions for a search to operate in.
+      
+\item A schema for publishing annotations, linked to log data, in an SQL
+	  database. Annotations might be:
+      
+\begin{itemize}
+\item Expert commentary, such as ``this log message means that down links
+      caused the network to be quiesced while re-calculating routing tables''      
+\item Human observations, such as ``during this period our engineer was 
+      replacing some failed nodes, so the network was probably disrupted'' 
+\item Machine-generated observations, such as message-pattern frequencies 
+      computed by running certain logs through an analysis tool such as 
+      Baler\textcolor{red}{cite}.
+\end{itemize}
+
+      The schema includes fields for the  components and the time period to 
+      which each annotation applies, allowing annotation sets to also be 
+      described with the RDF vocabulary
+
+\item A collection of tools to make the RDF vocabulary and annotation 
+      schema accessible to users, system administrators and support staff.
+
+      While nothing prevents annotators and researchers from directly 
+      annotating, describing and querying collections with SQL and RDF, 
+      the learning curve for these technologies presents an entry 
+      barrier to the time-constrained individuals who would otherwise
+      benefit from it. 
+      
+      Many interactions with annotated, discoverable log data can be 
+      can be described in just a few use cases:
+      
+\begin{itemize}
+\item Cataloging a collection to make it discoverable
+\item Annotating specific logs, either to add expert commentary to 
+      entries of interest or to associate human observations with log 
+      entries, log subjects or time periods
+\item Finding data relevant to a subject and time period of interest
+\item Extracting slices of logs associated with specific annotations, 
+      or periods and subjects of interest
+\end{itemize}
+
+     The diversity of data sources and formats mean that these use cases 
+     can be extended almost indefinitely, and providing a generalized 
+     interface to every conceivable HPC component and data format is 
+     not the goal here (see philosophy point \textcolor{red}{X}). We 
+     do, however, provide an extensible tooling infrastructure and tools
+     for some basic and common scenarios.
+
+\end{enumerate}
+
+\subsection{RDF Vocabulary}
+
+The need for a decentralized mechanism for publishing information whose 
+\emph{meaning} is machine-readable has been known for more than two decades
+\textcolor{red}{cite https://www.w3.org/Talks/WWW94Tim/}. Since then a 
+collection of tools and technologies supporting this has accumulated, with
+perhaps the most significant being the specification of RDF as a data 
+interchange format for the World Wide Web. \textcolor{red}{cite https://www.w3.org/RDF/?}
+In RDF \emph{things} (concepts or concrete items) are represented as URIs
+and arranged in \emph{triples} of a \emph{subject}, a \emph{predicate} and 
+an \emph{object}. For example:
+
+\begin{minted}{turtle}
+@prefix nersc: <http://portal.nersc.gov/project/mpccc/sleak/nersc#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+nersc:nersc rdfs:type foaf:Organization .
+\end{minted}
+
+In this triple the subject is a URI that we've chosen to associate with 
+NERSC. In reality, this is a web address where we can 
+(TODO make this more readable)
+the URI up to the final ``/'' is a web address the authors
+can publish files from, where we have added an RDF file called ``nersc.ttl'' 
+which includes an entry also called ``nersc''. If you point a web browser 
+there you will see a ``404'' error because the ``.ttl'' suffix is missing 
+(other public namespaces solve this with HTTP content negotiation) - but the 
+point is, we are confident that this is a unique URI we can use as an 
+identifier for NERSC. (And if a better identifier for NERSC comes along 
+we can link the two, also with RDF).
+
+The predicate here is one predefined by the RDF Schema to indicate the ``type''
+of a thing.
+
+And the object is a URI predefined by the Friend-of-a-friend ontology to
+indicate an Organization.
+
+A collection of triples forms a graph whose edges have well-defined meanings, 
+allowing information about nodes to be inferred from their relationships to 
+other nodes.
+
+Crucially, an RDF graph can be queried using SPARQL \textcolor{red}{cite}, a
+graph-query language with a look-and-feel based on SQL. A SPARQL query 
+arranges variables into a set of triples and returns sets of URIs for which
+the triples for a true statement. For example, the following SPARQL query
+will return the name and the web page for each node whose type is 
+a subclass of ``foaf:Agent''. ``foaf:Agent'' is a superclass for a Person, a 
+Group or an Organization, so this query in English is ``list the name and 
+webpage for each Person, Group or Organization in this graph''. (The 
+``rdfs:subClassOf*'' syntax indicates that the query should follow 
+``rdfs:subClassOf'' edges to any depth to find foaf:Agent at the end)
+
+\begin{minted}{sparql}
+SELECT ?name ?page 
+WHERE {
+    ?uri a ?type .
+    ?type rdfs:subClassOf* foaf:Agent .
+    ?uri foaf:name ?name .
+    ?uri foaf:page ?page .
+}
+\end{minted}
+
+\textcolor{red}{TODO: draw this as a diagram, probably explains it better}
+\textcolor{red}{TODO: prob need a ref to an "intro to semantic web" resource}
+
+-- next: why is RDF useful for solving our problem
+
+
+-- then: description and diagram of our vocabulary, and how it looks in terms of an example graph
+
+
+-- some key things to call out:
+\begin{itemize}
+\item someone publishing a logset doesn't need to know many people to get their 
+      logset into the graph - a curator of their local (site) catalog is enough. 
+      That curator then knows curators of at least one other catalog and thus 
+      gets the local 
+      subgraph into the global graph
+\item someone using the graph doesn't need to know who published what - they can
+      query the graph itself and get metadata about what is out there, including contact 
+      information for data they don't directly have access to. This allows them to 
+      solve specific access limitations in a locally-appropriate way
+\end{itemize}
+
+ 
+\subsection{Annotation Schema}
+
+
+
+\subsection{Tools}
+\begin{itemize}
+\item get.py for querying an annotation database
+\item what do we have for building an annotation database? (Ann's tool for ingesting the mutrino and jobs info?)
+\item framework for working with rdf graph
+
+(plan is to have cataloging and running general queries supported at least, and ideally also slicing-and-fetching of timestamped logs in line-per-timestamp format)
+
+
+\end{itemize}
+
+
+
+
+- talk about why, eg rdf because it is machine readable, supports adding tools etc over time 
+

@@ -390,17 +390,21 @@
 \newcommand{\RED}[1]
 {{\bfseries \color{red} #1}}
 
-\usepackage{url}
+
 
 %SJL added:
 \usepackage{flushend}
+\usepackage{url}
+\usepackage{minted}
+%\usepackage{listings}
+%\usepackage{hyperref}
 
 \begin{document}
 
 %
 % paper title
 % can use linebreaks \\ within to get better formatting as desired
-\title{Supporting failure analysis with discoverable, annotated log datasets -- LONG ABSTRACT}
+\title{Supporting failure analysis with discoverable, annotated log datasets}
 \author{Stephen Leak, Annette Greiner, Jim Brandt, and Ann Gentile}
 %\author{\IEEEauthorblockN{Stephen Leak, Annette Greiner}
 %\IEEEauthorblockA{National Energy Research Supercomputing Center (NERSC)\\
@@ -464,7 +468,11 @@
 % creates the second title. It will be ignored for other modes.
 \IEEEpeerreviewmaketitle
 
-\input{LongAbstractInnards}
+\input{intro}
+\input{requirements}
+\input{solution}
+\input{examples}
+\input{conclusions}
 
 % conference papers do not normally have an appendix
 
