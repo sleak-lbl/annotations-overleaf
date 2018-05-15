@@ -14,9 +14,9 @@ The diversity of data has various causes, including:
       as messages emitted by some software and is thus stored as
       text files with a timestamped line per entry, while job records
       as typically stored in database tables with well-defined fields.
-\item People do ad-hoc data collection in support of a specific 
+\item People do ad-hoc data collection in support of some specific 
       analysis. They use a data format and storage location that 
-      they are familiar with or that maps well to their specific 
+      they are familiar with or that maps well to their 
       analysis, and they generally don't have the luxury of time to 
       clean and present their data for a more general audience,
       especially without a specific motivating request to provide 
@@ -66,10 +66,11 @@ the difficulty of log anonymization and the limited cost-benefit
 trade-off between helping the community and the risk of mistakenly 
 releasing sensitive information. 
 
-The release paradigm of ``carefully redact sensitive information
-before releasing data'' is a roadblock for publishing datasets so
-a solution should promote the opposite paradigm of ``select some 
-non-sensitive data and release that'' instead \textbf{(requirement 3)}.
+The effort and risk in a release paradigm of ``carefully redact 
+sensitive information before releasing data'' is a roadblock for 
+publishing datasets so a solution should promote the opposite 
+paradigm of ``select some non-sensitive data and release that'' 
+instead \textbf{(requirement 3)}.
 
 The first failure analysis category is characterized by questions 
 like ``What are the relationships between elements in these data 
@@ -113,90 +114,59 @@ monitored., or to data about specific related subsystems within a
 time-frame, and without requiring a priori knowledge of that data
 \textbf{(requirement 5)}.
 
-
-
-This implies that a solution should provide a mechanism for discovery
-and filtering of 
-
-
-
-
-
-
------------
-
-Access alone is however insufficient, and 
-descriptive, authoritative annotations of significant log messages
-have also been identified as a valuable aid in discovery and
-understanding of system events~\cite{CUG2016BoF}. 
-
-Annotations solve other limitations of log datasets too. An event 
-may result in a cascade of log entries, intermingled with unrelated 
-and less-significant log messages that an analyst must comb through to 
-extract the significant entries and overall context. Furthermore, 
-the intervening entries may contain sensitive information that the data 
-owner may not want to publish, such as user login data. 
-
-expose more generally (e.g., user logins)
-
-For example,
-an event may 
-
-The context described above 
-
-
-Key points:
-
-\begin{itemize}
-\item the diversity of available data must be allowed for
-\begin{itemize}
-\item coercing people to do their data collection in a particular format
-      or storage isn't going to work, because:
-      
+So in summary, our solution should:
 \begin{enumerate}
-\item if the ``blessed'' format requires reformatting from the data source
-      and does not benefit their investigation, they'll simply stop 
-      advertising that they have the data
-\item a ``blessed'' centralized storage requires someone to maintain it,
-      and this person (or group) must commit to maintaining support for 
-      data feeds over which they have no control. (How do they know that 
-      the data going in is in a useful format, at useful cadence, and
-      won't overwhelm the capacity of their system?)
+\item Be agnostic towards the format and storage of data.
+\item Be decentralized.
+\item Allow publishing of data to be low effort and low risk.
+\item Allow domain experts to contribute advice in a format convenient for them.
+\item Support data discovery and filtering without requiring a 
+      priori knowledge of existing data
 \end{enumerate}
-\end{itemize}
 
-\item the diversity of expertise must be allowed for, and taken advantage of.
-
-      ie, combining annotations from diverse experts with logs from diverse 
-      sources is important
       
-\item ad-hoc investigation must be supported:
-\begin{itemize}
-\item people are going to do it anyway, might as well make good use of it
-\item ad-hoc investigators don't have the luxury of time to "clean" their 
-      data to make it useful for others without a specific motivating 
-      request that provides guidance and incentive
-      (eg: if I have collected a bunch of Slurm queue data, and my colleague 
-      asks "can you help me setup a feed of how jobs from group xyz are moving 
-      through the queue?", then I'll be inclined to munge my storage into a 
-      format supporting that query, but otherwise, I prefer to leave it in the 
-      format that is working for me and requires no extra effort from me)
-\end{itemize}
+      
+ These requirements seem to describe an impossible degree of complexity, but 
+computer science has an aphorism: ``We can solve any problem by introducing an extra level of indirection'' 
 
-\item people are time-constrained
+ \textcolor{red}{cite wikipedia Fundamental theorem of software engineering}
 
-\item there is too much data from too many sources for anyone to keep track of
+In this case the level of indirection is \emph{metadata}. By decoupling 
+publication of data from access to it, we can meet each of these 
+requirements:
 
-\item data must be discoverable 
+\begin{enumerate}
+\item Be agnostic towards the format and storage of data.
 
-\item case studies - not doing remote yet, that is in the larger architecture though
+      The metadata scheme should support descriptions of data 
+      formats and storage locations and mechanisms, preferably in a
+      consistent manner.
 
-\item not a generalized interface to slurm, baler, etc, for the moment we're putting things directly into sqlite
+\item Be decentralized.
 
-\item (arch supports plugin interfaces)
+	  The actual data should be left in place should describe the 
+
+A carefully-constructed metadata template allows 
+
+\item Allow publishing of data to be low effort and low risk.
+
+      A metadata template doesn't require the publisher to anonymize,
+      reformat or even provide access to data ...
+
+\item Allow domain experts to contribute advice in a format convenient for them.
+
+      Metadata meets this requirement in the same manner as it meets the first:
+      by decoupling the format and storage from the publication 
+
+\item Support data discovery and filtering without requiring a 
+      priori knowledge of existing data
+      
+      The scheme should be constructed so that metadata from
+      different sources 
+\end{enumerate}
 
 
-\end{itemize}
+
 
 
 

@@ -390,6 +390,13 @@
 \newcommand{\RED}[1]
 {{\bfseries \color{red} #1}}
 
+\usepackage{listings}
+\lstnewenvironment{annol}[1][]
+   {\lstset{basicstyle=\ttfamily\tiny,
+       breaklines=true,
+       escapeinside={<@}{@>},
+       linewidth=\linewidth, #1}}
+   {}
 
 
 %SJL added:
