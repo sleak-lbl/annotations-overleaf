@@ -378,7 +378,7 @@
 \usepackage{alltt}
 
 % ACG added for float figures
-\usepackage{fixltx2e}
+% \usepackage{fixltx2e}
 
 %ACG added for color comments
 \usepackage{xcolor}
@@ -397,6 +397,24 @@
        escapeinside={<@}{@>},
        linewidth=\linewidth, #1}}
    {}
+
+\usepackage{tcolorbox}
+\newtcolorbox{keypoint}{colback=yellow!10!white,title={Key Point}}
+%\begin{tcolorbox}[colback=yellow!10!white,
+%                     colframe=white!20!black,
+%                     title=\textsc{\texttt{tcolorbox} at a glance},  
+%                     center, 
+%                     valign=top, 
+%                     halign=left,
+%                     before skip=0.8cm, 
+%                     after skip=1.2cm,
+%                     center title, 
+%                     width=12cm]
+% 
+%     This is a highlight box created by \texttt{tcolorbox} package. \\
+%     \tiny P.S.: Tons of features come with the package. Check out 
+%      the user manual on http://ctan.sharelatex.com/tex-archive/macros/latex2e/contrib/tcolorbox/tcolorbox.pdf
+%  \end{tcolorbox}
 
 
 %SJL added:
