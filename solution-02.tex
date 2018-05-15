@@ -1,0 +1,140 @@
+\subsection{Annotation Schema}
+
+In this subsection we describe the major fields necessary to support the
+architectural requirements that pertain to the annotations themselves
+(as opposed to the remote discovery infrastructure). The prototype
+implementation is an SQLite database, so we descirbe in in terms
+of that implemention, however that is not required. More generally
+this would be descirbed in terms of accessor APIs independent of
+the implementation beneath them.
+
+The annotations table is defined as:
+\begin{small}
+\begin{minted}{sql}
+CREATE TABLE 'annotations' (
+       'id' integer,
+       'authorid' char(3) NOT NULL,
+       'starttime' datetime NOT NULL,
+       'endtime' datetime NOT NULL,
+       'startstate' text,
+       'endstate' text,
+       'description' text NOT NULL,
+       'manual' boolean,
+       'logfiles' text,
+       'system' text,
+       'systemdown' boolean,
+       'LDcatgroup' text \
+          REFERENCES 'LDgroups'('id'),
+       'LDcategory' text,
+       'LDtag' text,
+       'components' text,
+        balerpatternid integer,
+        PRIMARY KEY('id','authorid')
+        );
+\end{minted}
+\end{small}
+
+The major fields for an annotations include \texttt{description}, \texttt{starttime}, \texttt{end time},
+\texttt{system}, and \texttt{components} involved.
+The description is a descriptive translation of a log messge or event (Examples
+are given in Section~\ref{s:annotations}); it is this description to which we
+mainly refer when we refer to an annotation.
+The \texttt{authorid} identifies the author of an annotation, who
+is responsible for the determination of the content of the assignable fields
+(such as the description); the authorid and annotation id together form a unique key.
+Time and component fields refer to a specific instance of a log line or event
+occurence. Thus multiple annotated log line instances may share the same description,
+but have different time and component values.
+
+Other information is used to help with context and search.
+For example, \texttt{startstate} and \texttt{endstate}, which
+are subjective and can be used to record things like a component
+that starts a faulty but is repaired by the action of the annotations,
+for example, if the event is recording that a DIMM was changed.
+\texttt{Systemdown} is meant to aid in the search for events that result
+in full system failure.
+
+\texttt{Manual} is used to indicate manually performed
+events, such as an administrator action to take down a node as opposed
+to the system taking down a node because it failed a health check.
+Knowledge of this can be used to more accurately determine the
+number of true failure events and for assessing the effectiveness
+and availability of system resilience mechansims vs required
+human intervention.
+
+A set of fields, \texttt{LDXXX} are available to give contextual inforatmion.
+At the moment only \texttt{LDcategory} is used; this is used to define the major
+subsystem relevant to the annotation. The current options are: \texttt{node/blade},
+\texttt{scheduler}, \texttt{storage}, \texttt{network}, \texttt{cooling/facilities/sensors},
+\texttt{power}, \texttt{system software}, \texttt{datawarp}, and \texttt{unknown}.
+
+Note that event may have many relationships. We choose to limit them to one each to address
+the requirement of searchability. It is expected that exploration will facilitate dsicovery
+of events, even when the first order assocation may be off; also discovery of assocationed
+events in different subsytems can help understanding of how events propagate in a system.
+
+Annotations may also refer to other annotations; this is called a \texttt{metaannotation}.
+An example might be where an annotation refers to a particular facilities
+test and a meta annotations refers to the entire set of tests.
+
+\texttt{Components} can include the compute and any supporting subsystems,
+such as storage and facilities related elements. For the Cray system
+itself, we define \texttt{node}, \texttt{blade}, \texttt{chassis},
+\texttt{cabinet}, \texttt{router}, \texttt{tile}, \texttt{link}, \texttt{nic},
+\texttt{smw}, and \texttt{other}.
+
+In order to enable dsicovery of events which are either reported on related
+compoentns or that propagate amont components we support the defintion
+of \texttt{architectures}. For the Cray system itself, we define three.
+
+The \texttt{physical} architecture consists of parent-child or
+container-contained assocations, such as a cabinet is the parent of
+3 chassis. For the network components, the router is a child of the blade.
+he router is a parent of the links and nics. The physical architecture
+can be populated from system defintation (e.g., XE or XC with the
+correct number of cabinets for a system).
+
+In order to support the fact that components may be identified by differnet
+names in different log messages, an \texttt{alias} table defines those conventions.
+This is largely cname, nid, and IP addresses determined from \texttt{/etc/hosts}
+or the output for \texttt{rtr --system-map}.
+
+The \texttt{router} architecture includes the network topology information
+for the router (e.g., blue:black:green)
+for Aries and X:Y:Z for gemini). The router information can be populated from
+the system-map output or the otuput of \texttt{rtr --interconnect}.
+The \texttt{link} architecture represents the network link connectivity,
+consisting of type (e.g., Blue, X+) and the tile endpoints obtained
+from the interconnect output.
+
+The \texttt{link} architecuture supports determination if an event affects the
+components at teh other end of a network link. The router architecutre
+supports determination of proximity of events in the network topology.
+We chose to separate architecutres in order to enable different
+search and interpreation of events which affect components with
+different \texttt{association} with each other. \texttt{associations}
+include \texttt{parent-child: component-component} as opposed to
+\texttt{parent-child: router tile}, or \texttt{peer: HSN link}
+as opposed to \texttt{peer: Router-NIC} or \texttt{peer: NIC-Proc}.
+To represent more globally associated, such as SMW
+events which can directly affect all components, we define
+a \texttt{supremum} relationship.
+
+In the prototype, we define all architectures and relationships,
+however we currently prinipally search the physical topology only
+and support recursive search up and down, including for supremum
+relationships. We are working on tools to better enable search of
+the multiple architecture represenations.
+
+In order to determine the effect of events on jobs, we also
+intend that job data be made availble with the annotations.
+We expect only the current common fields (e.g., starttime,
+endtime, components, etc) exposed in scheulder logs or
+interfaces.
+
+
+
+
+
+
+

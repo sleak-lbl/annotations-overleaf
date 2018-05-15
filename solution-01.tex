@@ -1,0 +1,98 @@
+\subsection{RDF Vocabulary}
+
+The need for a decentralized mechanism for publishing information whose 
+\emph{meaning} is machine-readable has been known for more than two decades
+\textcolor{red}{cite https://www.w3.org/Talks/WWW94Tim/}. Since then a 
+collection of tools and technologies supporting this has accumulated, with
+perhaps the most significant being the specification of RDF as a data 
+interchange format for the World Wide Web. \textcolor{red}{cite https://www.w3.org/RDF/?}
+In RDF \emph{things} (concepts or concrete items) are represented as URIs
+and arranged in \emph{triples} of a \emph{subject}, a \emph{predicate} and 
+an \emph{object}. 
+
+% do this as a figure, see Ann's example
+\begin{figure*}
+\begin{minted}{turtle}
+@prefix nersc: <http://portal.nersc.gov/project/mpccc/sleak/nersc#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+nersc:nersc rdfs:type foaf:Organization .
+\end{minted}
+
+\caption{A triple of (subject, predicate, object) describes an edge 
+in an RDF graph. The \texttt{Turtle}\textcolor{red}{cite} syntax shown
+here aids human readability by condensing URIs into a prefix and a suffix,
+so \texttt{rdfs:type} expands as
+\texttt{<http://www.w3.org/2000/01/rdf-schema\#type>}.}
+\label{f:rdftriples}
+\end{figure*}
+
+For example, in Figure~\ref{f:rdftriples} the subject is a URI that 
+we've chosen to associate with NERSC. In reality, this is a web address where we can 
+(TODO make this more readable)
+the URI up to the final ``/'' is a web address the authors
+can publish files from, where we have added an RDF file called ``nersc.ttl'' 
+which includes an entry also called ``nersc''. If you point a web browser 
+there you will see a ``404'' error because the ``.ttl'' suffix is missing 
+(other public namespaces solve this with HTTP content negotiation) - but the 
+point is, we are confident that this is a unique URI we can use as an 
+identifier for NERSC. (And if a better identifier for NERSC comes along 
+we can link the two, also with RDF).
+
+The predicate here is one predefined by the RDF Schema to indicate the ``type''
+of a thing.
+
+And the object is a URI predefined by the Friend-of-a-friend ontology to
+indicate an Organization.
+
+A collection of triples forms a graph whose edges have well-defined meanings, 
+allowing information about nodes to be inferred from their relationships to 
+other nodes.
+
+Crucially, an RDF graph can be queried using SPARQL \textcolor{red}{cite}, a
+graph-query language with a look-and-feel based on SQL. A SPARQL query 
+arranges variables into a set of triples and returns sets of URIs for which
+the triples for a true statement. For example, the following SPARQL query
+will return the name and the web page for each node whose type is 
+a subclass of \texttt{foaf:Agent}. \texttt{foaf:Agent} is a superclass for a Person, a 
+Group or an Organization, so this query in English is ``list the name and 
+webpage for each Person, Group or Organization in this graph''. (The 
+\texttt{rdfs:subClassOf*} syntax indicates that the query should follow 
+\texttt{rdfs:subClassOf} edges to any depth until a \texttt{foaf:Agent} is encountered)
+
+\begin{minted}{sparql}
+SELECT ?name ?page 
+WHERE {
+    ?uri a ?type .
+    ?type rdfs:subClassOf* foaf:Agent .
+    ?uri foaf:name ?name .
+    ?uri foaf:page ?page .
+}
+\end{minted}
+
+\textcolor{red}{TODO: draw this as a diagram, probably explains it better}
+\textcolor{red}{TODO: prob need a ref to an "intro to semantic web" resource}
+
+\subsubsection{Why RDF?}
+
+-- next: why is RDF useful for solving our problem
+
+\subsubsection{The vocabulary}
+
+\textcolor{red}{TODO include a diagram}
+
+
+-- some key things to call out:
+\begin{itemize}
+\item someone publishing a logset doesn't need to know many people to get their 
+      logset into the graph - a curator of their local (site) catalog is enough. 
+      That curator then knows curators of at least one other catalog and thus 
+      gets the local 
+      subgraph into the global graph
+\item someone using the graph doesn't need to know who published what - they can
+      query the graph itself and get metadata about what is out there, including contact 
+      information for data they don't directly have access to. This allows them to 
+      solve specific access limitations in a locally-appropriate way
+\end{itemize}
+
+ 

@@ -17,7 +17,7 @@ TITLE?=main
 ###### COMPILER SETTINGS (ONLY ADMINS BELOW) ######
 #COMPILERS/LINKERS
 # MAKPDF:=latexmk -lualatex
-MAKPDF:=latexmk -pdf
+MAKPDF:=latexmk -pdf -shell-escape
 CLEAN:=latexmk -c
 PURGE:=latexmk -C
 
