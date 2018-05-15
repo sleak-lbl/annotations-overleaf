@@ -1,6 +1,150 @@
 \section{Requirements for a Solution}
 \label{s:requirements}
 
+%(from above: In summary the diversity and volume of data, distribution of expertise, risks 
+%around publication and challenges of discovery have limited our ability to 
+%extract useful insights from the data we collect. In the next section we explore 
+%the requirements for a solution to address these constraints.)
+
+The diversity of data has various causes, including:
+
+\begin{itemize}
+\item Each data source uses a format and storage chosen for its own 
+      specific purpose - for example log data frequently originates
+      as messages emitted by some software and is thus stored as
+      text files with a timestamped line per entry, while job records
+      as typically stored in database tables with well-defined fields.
+\item People do ad-hoc data collection in support of a specific 
+      analysis. They use a data format and storage location that 
+      they are familiar with or that maps well to their specific 
+      analysis, and they generally don't have the luxury of time to 
+      clean and present their data for a more general audience,
+      especially without a specific motivating request to provide 
+      guidance and incentive.
+\end{itemize}
+
+This implies that any solution must be somewhat 
+agnostic towards the format and storage of said data \textbf{(requirement 1)}.
+
+One attractive approach is to use a tool like LogStash~\textcolor{red}{cite} 
+to convert everything to a common format and collect it in a single 
+centralized location. This can provide an effective means to integrate
+and explore data but has some limitations:
+
+\begin{itemize}
+\item People doing ad-hoc data collection in support of a specific 
+      analysis simply won't comply - if the burden of cleaning and 
+      converting their data to a suitable format for centralized 
+      storage seems high compared to the benefit of doing so, many
+      will simply stop publicizing the fact of the collection.
+\item The diversity of security domains poses a challenge: should data
+      be captured to a higher-security domain, filtered to a lower-security
+      domain or should each security domain have its own storage?
+\item A centralized solution requires a significant commitment to
+      centralized maintenance. (And how do the maintainers know that the 
+      incoming data is in a useful format, at a useful cadence and
+      tractable volume?)
+\end{itemize}
+
+These limitations imply that the solution should be decentralized 
+\textbf{(requirement 2)}. 
+
+Failure analysis falls into two broad categories:
+\begin{enumerate}
+\item Resilience research aiming to better understand fault propagation,
+      root causes, impacts of events and weaknesses in a system. 
+\item Operational troubleshooting aimed at finding, understanding and
+      mitigating a specific failure.
+\end{enumerate}
+
+Access to log datasets is an obvious requirement to support
+the first category, and the release of some such datasets is a goal 
+of the HMDR project\textcolor{red}{CITE}. But it is well-known in the research 
+community that very few datasets are released for researchers
+due to the presence of sensitive data such as user login information, 
+the difficulty of log anonymization and the limited cost-benefit 
+trade-off between helping the community and the risk of mistakenly 
+releasing sensitive information. 
+
+The release paradigm of ``carefully redact sensitive information
+before releasing data'' is a roadblock for publishing datasets so
+a solution should promote the opposite paradigm of ``select some 
+non-sensitive data and release that'' instead \textbf{(requirement 3)}.
+
+The first failure analysis category is characterized by questions 
+like ``What are the relationships between elements in these data 
+collections?'' and ``What does \emph{this} pattern of log message imply?''.
+For these an ability to explore a wide set of related logs for 
+possibly-connected events is useful, and to discover and compare 
+against compare against different instances of the same event 
+patterns elsewhere in the data, or on a different but similar 
+system, or in the context of a controlled fault-injection experiment. 
+
+Expert commentary on the meaning of log messages helps in recognizing
+these relationships, and at the 2016 Cray User's Group Monitoring 
+BoF~\cite{CUG2016BoF} the community, comprised largely of people with 
+substantial Cray experience, concluded that it would be valuable to 
+have authoritative descriptive annotations of significant log messages.
+
+The expertise necessary to provide such annotation is however distributed 
+across many individuals, all of whom have other, primary responsibilities. 
+To address this distribution of expertise, a solution must allow for 
+different domain experts to contribute advice in the format that they
+use it \textbf{(requirement 4)} - this might be for example a 
+spreadsheet of log message definitions or a ticketing system with 
+maintenance requests and notes.
+
+The second category approaches from the opposite direction: ``What 
+faults or conditions contributed to \emph{this} failure of \emph{this} 
+thing at \emph{this} time?''. Rather than a broad exploration of data, 
+a tractable volume of data is desirable, with unrelated entries 
+filtered out. 
+
+An issue affecting both categories is the discovery of relevant data. 
+Different teams undertaking related inquiries on different data 
+in different places can mutually benefit by combining their data and
+insights, if they can become aware of each others' data and efforts. 
+
+Our final requirement then, driven by the needs of exploring widely,
+filtering data to a tractable relevant set and discovering related 
+analysis efforts by other teams, is that the solution should support 
+data discovery with reference to the types of subsystems being 
+monitored., or to data about specific related subsystems within a
+time-frame, and without requiring a priori knowledge of that data
+\textbf{(requirement 5)}.
+
+
+
+This implies that a solution should provide a mechanism for discovery
+and filtering of 
+
+
+
+
+
+
+-----------
+
+Access alone is however insufficient, and 
+descriptive, authoritative annotations of significant log messages
+have also been identified as a valuable aid in discovery and
+understanding of system events~\cite{CUG2016BoF}. 
+
+Annotations solve other limitations of log datasets too. An event 
+may result in a cascade of log entries, intermingled with unrelated 
+and less-significant log messages that an analyst must comb through to 
+extract the significant entries and overall context. Furthermore, 
+the intervening entries may contain sensitive information that the data 
+owner may not want to publish, such as user login data. 
+
+expose more generally (e.g., user logins)
+
+For example,
+an event may 
+
+The context described above 
+
+
 Key points:
 
 \begin{itemize}

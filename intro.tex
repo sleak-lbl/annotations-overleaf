@@ -20,10 +20,12 @@ section~\ref{s:solution}, with some illustrative case studies in
 \label{s:context}
 
 To illustrate the opportunities and challenges posed by the assortment of 
-log-and-related data, consider NERSC:
+log-and-related data, consider NERSC and Sandia National Laboratory, two of the 
+institutions represented by the authors:
 
-NERSC's Cori system has 2388 Xeon nodes, 9688 Xeon Phi nodes, a host of service 
-nodes providing I/O forwarding, a burst-buffer filesystem, Lustre networking and
+NERSC's Cori system is a Cray XC40 with 2388 Xeon nodes, 9688 Xeon Phi nodes, 
+a host of service nodes providing I/O forwarding, a Datawarp \textcolor{red}{CITE}
+burst-buffer filesystem, Lustre networking and
 system management, and an Aries high-speed network in a Dragonfly topology. Cori
 has a large external Lustre filesystem also cross-mounted on Edison - another 
 large Cray system at NERSC - via Infiniband. It has external login nodes and 
@@ -33,19 +35,15 @@ programming environments, Cori runs multiple compilers and MPI stacks and
 hundreds of software packages. Its 7,000 users run tens of thousands of jobs per 
 day via the Slurm batch scheduler.
 
-NERSC is a large center with multiple clusters and storage systems - including 
-bleeding-edge technologies and in the order of 100 staff members supporting 
-various aspects of the facility and the several hundred projects and several 
-thousand users it supports.
+Sandia, with Los Alamos National Laboratory operates Trinity, another Cray XC40
+with 9436 Xeon and over 9500 Xeon Phi nodes, a Datawarp burst buffer, Aries HSN
+and Lustre filesystem. Trinity serves the needs to the National Nuclear 
+Security Administration and has far stricter access limitations than does Cori.
 
-The scale and complexity of facilities such as NERSC continues to increase as 
-we address the challenges of providing exascale systems and the challenges that 
-will follow it.
-
-With increasing scale and complexity, the ability to identify and characterize 
-faults leading to fails becomes more important, simply because scale and 
-complexity increase the probability of a fault impacting the facility's ability
-to support its scientific workload. 
+Both are large centers with multiple production and test-bed systems including 
+bleeding-edge technologies and many staff members supporting 
+various aspects of each facility and the several hundred projects and several 
+thousand users they collectively support.
 
 Data such as system logs, environmental metrics, job history, filesystem state,
 outage notices and user reports are already routinely collected, but the 
@@ -59,32 +57,42 @@ each investigation and is limited by several constraints:
 \item Data is collected in different formats, usually based on the output format
       of specific data sources and the needs of a specific investigation.
 \item Data is stored in different places with different access mechanisms - flat 
-      text files, binary formats such as HDF5,~\textcolor{red}{cite} SQL and 
+      text files, binary formats including HDF5,~\textcolor{red}{cite} SQL and 
       NoSQL databases, JSON via a RESTful interface, etc.
-\item Much of the collected data requires domain expertise to interpret, and the
-      variety of domains within HPC ensures that very few people have the 
-      capability of combining information from more than a few sources into a
-      broader insight about what the data implies.
-\item Users and staff are not necessarily aware of what data is being collected.
-      This doesn't imply communication problems within an organization: many 
-      collections are ad-hoc and for a specific purpose, and the effort required 
-      to make them suitable for wider use is not considered justified. Not all 
-      collections are by center staff - for example some advanced users keep
-      a database of performance of their regular workflows, information that 
-      could give early warning of system issues if the data was visible to 
-      center staff.
+\item Not all data is suitable for publication. Log files intersperse entries
+      relating to events contributing to some failure with unrelated entries
+      that may contain sensitive information such as user login details. The 
+      difficulty of log anonymization and risk of mistakenly releasing sensitive 
+      information discourages data owners from exposing data to the wider 
+      community.
+\item The volume of data is very large, requiring an analyst to comb through 
+      many unrelated log entries to identify the significant entries.
+\item Much of the collected data requires domain expertise to interpret, and 
+      this expertise is distributed across many people. For example: at the 
+      2016 Cray User's Group Monitoring BoF~\cite{CUG2016BoF}, the community, 
+      comprised largely of people with substantial Cray experience, concluded 
+      that it would be valuable to have authoritative, descriptive annotations 
+      of significant log messages to aid in discover and understanding of system 
+      events.
+\item ``Failure'' is often vaguely defined (``my job took 30\% longer today than 
+      usual'') and research into failures and resilience is often exploratory.
+\item Users and staff are not necessarily aware of what data is being collected
+      within a center, let alone between centers. Data and expertise that might 
+      positively impact failure analyses therefore goes overlooked.
 \end{itemize}
 
-Furthermore, facilities having components in common could benefit from sharing 
-some log data - for example, diagnosis of a filesystem issue experienced by one 
-facility but not another might be aided by comparatively analyzing logs from 
-both facilities.
+In summary the diversity and volume of data, distribution of expertise, risks 
+around publication and challenges of discovery have limited our ability to 
+extract useful insights from the data we collect. In the next section we explore 
+the requirements for a solution to address these constraints.
 
-\textcolor{red}{TODO} talk about the vagueness of failure reports, and 
-exploratory nature of investigations
 
-\textcolor{red}{TODO} so fundamentally the reason for why this has not been 
-solved is that the problem is difficult to even define, and he scattered nature
-of data makes it difficult to wrangle
+
+
+
+
+
+
+
 
 
