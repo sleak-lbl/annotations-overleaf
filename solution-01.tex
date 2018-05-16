@@ -119,24 +119,107 @@ tools and libraries to achieve our goals.
 
 \subsubsection{The vocabulary}
 
-The key classes and predicates forming our vocabulary are illustrated in Figure~\ref{f:logset-classes}. The vocabulary is extended and specialized from the Data Catalog Vocabulary \textcolor{red}{cite}. The meaning, reason and usage of each are as follows:
+The key classes and predicates forming our vocabulary are illustrated in 
+Figure~\ref{f:logset-classes}. Figure~\ref{f:logset-classes-nodes} provides 
+examples of nodes in a graph corresponding to each class, and an 
+illustration of how RDF descriptions of different \texttt{LogSet}s published 
+in different places form a single, global graph is show in 
+Figure~\ref{f:logset-example}. Particularly, Figure~\ref{f:logset-example}
+shows how the vocabulary can be used to publish data dictionaries 
+describing different \texttt{SubjectType}s and \texttt{LogSeries}.
+
+The vocabulary is extended and specialized 
+from the Data Catalog Vocabulary \textcolor{red}{cite}. The meaning, 
+reason and usage of each are as follows:
 
 \begin{description}
-\item[Catalog] 
+\item[Catalog] \hfill
+
 The \texttt{dcat:Catalog} class is used as an access point to LogSet datasets and 
 to link disparate collections into a single graph. Catalogs are anticipated to be 
-published at a site granularity: staff at a site would publish the LogSets 
-at whatever URL each individual can access 
-\item[LogSet] 
+published at a site granularity: staff at a site would publish LogSets under
+a URL that the staff member can access, linked to the global graph via a single 
+entry in the site Catalog. (The mechanism for this can be as simple as a pull
+request to a Github repository).
+
+\texttt{Catalog}s can use \texttt{rdfs:seeAlso} properties to link to other 
+catalogs and to data dictionary
+
+\item[LogSet] \hfill
+
 A collection of logs related in system and access and timespan,
 for example the logs collected in a \texttt{p0-} directory in the SMW of a Cray
-XC for a single boot session. A LogSet might be made available would normally be made available 
+XC for a single boot session. The \texttt{LogSet} should provide a description
+of the data and contact information and is an entry point to metadata for 
+the \texttt{ConcreteLog}s.
+
+Note that the \texttt{LogSet} itself doesn't necessarily have properties for 
+temporal or subject information. We anticipate that these would be derived 
+from the \texttt{ConcreteLog}s comprising the \texttt{LogSet}.
+
+A \texttt{LogSet} might be a closed archive or might be ``open'', that is' 
+acquiring new logs over time. This is indicated via the \texttt{isClosed} 
+property, ..
+
+\item[ConcreteLog] \hfill
+
+A \texttt{ConcreteLog} describes a specific, concrete source of log entries.
+This might be a log file but could also be, for example, a Slurm instance
+from which job data can be obtained. 
+
+The \texttt{accessURL} and \texttt{downloadURL} have subtly different uses,
+inherited from \texttt{dcat:Distribution}. The actual data described by the 
+\texttt{ConcreteLog} may not be directly accessible (due to security or 
+other practical constraints), in which case an \texttt{accessURL} which 
+can help a user to learn about gaining access is more suitable than a 
+\texttt{downloadURL}, which is expected to provide direct access to the 
+data.
+
+
+The \texttt{ConcreteLog} also supports a number of properties about the
+size, number of records and timespan of the data. For many data sources 
+an ill-considered query might result in an excessive volume of data returned,
+so these properties are intended to help users check 
+
+
+\item[LogSeries] \hfill
+
+The console log for a server is often distributed over multiple files,
+and is fundamentally the same for servers of the same make at different
+sites. A \texttt{LogSeries} allows the common metadata to be published
+once in a common dictionary...
+
+
+\item[LogFormatType]
+
+One level more general than a \texttt{LogSeries}, a \texttt{LogFormatType}
+is common to many \texttt{LogSeries}. As an example, many \texttt{LogSeries}
+have the form of a \texttt{timeStampedLogFile}. Another significant 
+\texttt{LogFormatType} is \texttt{sqlite3DB} (which encapsulates our 
+reference implementation of the Annotation Schema~\textcolor{red}{cross-ref})
+
+\item[Subject]
+...
+affects and partOf
+
+
+
+\item[SubjectType]
+
+Each \texttt{ConcreteLog} has a specific \texttt{Subject} - e.g. a 
+\texttt{cori} or \texttt{cori\_nid00123}. It is useful to classify 
+\texttt{Subject}s by their type so that for example, a researcher 
+seeking HSN data can find \texttt{ConcreteLog}s about the HSN 
+component of multiple clusters by querying for \texttt{ConcreteLogs}
+whose \texttt{subject} is a specific \texttt{subjectType}. 
+
+This also supports cataloging new datasets: rather than asking the
+user the \texttt{subject} of each \texttt{ConcreteLog}, we can 
+
+skos:broader, also aspectof
+
 
 \end{description}
-
-
-\textcolor{red}{TODO include a diagram}
-
 
 -- some key things to call out:
 \begin{itemize}
@@ -152,8 +235,20 @@ XC for a single boot session. A LogSet might be made available would normally be
 \end{itemize}
 
 \begin{figure*}
-\includegraphics[width=0.9\textwidth]{logset-key-classes.png}
+\includegraphics[width=1.0\textwidth]{logset-key-classes.png}
 \caption{Key classes and predicates in the logset vocabulary. }
 \label{f:logset-classes}
 \end{figure*}
 
+\begin{figure*}
+\includegraphics[width=0.9\textwidth]{logset-classes-nodes.png}
+\caption{Examples of some nodes and relationships published in different places 
+from different sites (indicated via color), forming a single global graph. }
+\label{f:logset-classes-nodes}
+\end{figure*}
+
+\begin{figure*}
+\includegraphics[width=0.9\textwidth]{logset-example.png}
+\caption{Key classes and predicates in the logset vocabulary. }
+\label{f:logset-example}
+\end{figure*}
