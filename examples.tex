@@ -1,52 +1,34 @@
 \section{Case Studies}
 \label{s:examples}
 
-We fed Baler with the Cray logs as they resided on the SMW This requires us
-to do some file-specific format extraction of messages, timestamps,
-and components (e.g., \texttt{netwatch}, \texttt{hwerrlog}) which we may not have had to do if
-we fed it raw syslog versions of the files or datastream however, this also enables us
-to include the log file type (e.g., \texttt{nlrd}, \texttt{hwerrlog}) in the pattern metadata,
-whcih aids the log file look up. For many cases, messages are reported
-on the SMW with the component association of the SMW. For some cases, we can
-extract the actual component of interest, for example, from the Baler pattern
-\texttt{<host> nlrd <pid> found\_critical\_aries\_error: handling failed * link on <host> (node )}
-we can infer the fields from which to extract the \texttt{host} and \texttt{node} to which
-the annotation should be associated. Other messages refer to actions by the SMW for which
-the component cannot be inferred. In these cases the component assignment will either be
-the smw or 'unknown'.
+We show use of the annotations usign the prototype implementation and tools. Examples
+demonstrate the utility of the annotations in understanding
+event occurences and in problem diagnosis. They demonstrate that
+the search space is greatly reduced from the whole log files, yet
+the key evetns are revealed. They show how the annotations can be
+used to drive further analysis in the log files. They show that
+the descriptions can provide contentual information needed
+for understanding events, thus lowering the barrier of
+expert knowledge needed for understanding log events.
 
-We used Baler for all major log processing, except for the \texttt{command} log, which required us
-to associate \texttt{START} and \texttt{END} of events, for which we used a perl script. This
-log includes both manually initiated and automatically invoked commands of
-interest such as warmswaps, boots, etc. This was particularly useful for
-determining manual actions that may not have been well documented by the
-system administrators. This resulted in another 2000 annotations. In addition,
-we extracted the times of reboots from the datatime in the name of the \texttt{p0-XXX}
-directories. All annotations from these two sources are attributed as manually induced.
+In these examples, we have presented our annotations in their current
+state -- including typos and uncertainties in the interpretations.
+We expect that this will be reflective of the annotations
+in operation, with annotations evolving as additional authors
+weigh in and additional expertise is obtained.
 
-Some other system administrator actions were recorded by manually generated annotations
-(about 10, in this case). Ticketing systems may be used to generate such annotations as well.
-Knowledge of such events is useful for understanding the root causes and resolution of errors
-in the dataset. These annotations were generated manually.
+Note that some columns in the figures of annotation queries have been supressed due to space
+constratints. We explictly retain the balerpatternid in the columns as this makes it easier
+for the reader to associate individual instances of annotations of the same underlying event type
+(e.g., same log message expect for a different component at a different time).
+Colors in figures containing annotations are used to help call out annotations
+refered to in the text.
 
-Other non-log events include external actions by non-administrators
-such as facilities tests, fault injection research, which require
-annotations by differnet people. These were also generated manually
-for this dataset. Similar to the Baler Annotations, for the
-prototype these were loaded into the same annotation database.
+\RED{Note to Steve: did you want to do a display of annotation occurences?
+If so, the output files from some of the queries are int he output directory or
+I can gin up some other cases to display.}
 
-Log data was extracted from alps logs, which was the scheduler in use for
-this time period. This could be replaced with queries to a slurm,
-or similar, database or interface, where available.
-
-Recall that the main aim of the annotations
-is to provide a reduced set of searchable, understandable data, with the
-ability to use the annotations to further more detailed search of the raw
-logs, if possible and desired. This differs from tools
-such as SEC, which is intended to enable action upon the run time
-occurence of a log line matching a regex (e.g., notification
-of failed component), or Splunk, which is intended
-to facilitate knowledge of the occurences of pre-defined
-events with accompaning statistical plots.
-
+\input{03200-Power}
+\input{03100-Reseating}
+\input{03300-RouteFailed}
 

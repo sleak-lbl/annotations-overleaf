@@ -1,0 +1,149 @@
+\subsection{Root Cause Diagnosis}
+\label{s:route}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+Another network investigation started with a search for annotations involving the word ''route''.
+We were expecting to see events about reroutes triggered as a result of component failure. More interesting
+are cases where the reroute failed. Query output is shown in Figure~\ref{f:routeq}.
+
+\begin{figure*}
+\begin{annol}
+python get.py -t route -f table annotations
+
+id	authorid	starttime	endtime	state	description	manual	logfiles LDcategory	components	balerpatternid
+752245	acg	2015-02-27 11:53:08	2015-02-27 11:53:08	Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
+...
+752255	acg	2015-05-08 07:54:15	2015-05-08 07:54:15	Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
+752256	acg	2015-05-08 08:11:47	2015-05-08 08:11:47	Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
+<@\textbf{\textcolor{red}{756223	acg	2015-05-08 08:17:46	2015-05-08 08:17:46	Error during computation of network route    nlrd	NE	["unknown"]	749}}@>
+<@\textbf{\textcolor{red}{756224	acg	2015-05-08 08:31:24	2015-05-08 08:31:24	Error during computation of network route    nlrd	NE	["unknown"]	749}}@>
+\end{annol}
+\caption{Output of query for route annotations. Complete output = 15 annotations}
+\label{f:routeq}
+\end{figure*}
+%752254	acg	2015-05-08 07:35:42	2015-05-08 07:35:42	Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
+
+Note that the annotation in red \texttt{Setting alerts due to failures. A network reroute is required} makes clear that there has been a failure and what the next step in the response will be. It appears that 3 failures occurred that require network reroutes to recover and two of the computations of those routes failed.
+
+To understand why the route computation failed, we query for annotations during a time frame proceeding the event, limiting the options to network (NE) annotations only.
+Query output is shown in Figure~\ref{f:routNEq}. It is clear from the annotations, that the component triggering the problem was \texttt{c0-0c0s9a0} and that
+while the recovey operation for a failed link was successful (green), that the
+failure of the reroute was due a problem in adding the blade back to the HSN (to include it in the routing) (orange).
+
+
+\begin{figure*}
+\begin{annol}
+python get.py -s ''2015-05-08 08:00:00'' -e ''2015-05-08 08:35:00'' -t LDcat=NE -f table annotations
+
+id	authorid	starttime	endtime	description	manual	logfiles	LDcategory	components	balerpatternid
+866450	acg	2015-05-08 08:11:42	2015-05-08 08:11:42	xtcli set_alert	1	commands	NE	["c0-0c0s9a0"]
+752256	acg	2015-05-08 08:11:47	2015-05-08 08:11:47	Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
+756234	acg	2015-05-08 08:11:49	2015-05-08 08:11:49	Quiescing the network. This should result in decreased network injection.	nlrd	NE	["unknown"]	509
+756244	acg	2015-05-08 08:11:50	2015-05-08 08:11:50	Finished quiescing the network. (Is this just the steps in quiesce?).		nlrd	NE	["unknown"]	512
+756254	acg	2015-05-08 08:12:04	2015-05-08 08:12:04	Unquiescing the network. This will allow normal traffic injection to resume.	nlrd	NE	["unknown"]	554
+756148	acg	2015-05-08 08:12:05	2015-05-08 08:12:05	Telling all blades to unthrottle network bandwidth. This should enable increased network injection.	nlrd	NE	["unknown"]	423
+756264	acg	2015-05-08 08:12:05	2015-05-08 08:12:05	Finished unquiescing the network. This will allow normal traffic injection to resume.	nlrd	NE	["unknown"]	557
+<@\textbf{\textcolor{green}{766598	acg	2015-05-08 08:12:05	2015-05-08 08:12:05	The recovery operation for a failed link(s) was successful	nlrd	NE	["unknown"]	563}}@>
+864984	acg	2015-05-08 08:16:43	2015-05-08 08:16:43	xtcli clr_alert	1	commands	NE	["c0-0c0s9a0"]
+<@\textbf{\textcolor{orange}{752223	acg	2015-05-08 08:17:46	2015-05-08 08:17:46	Marking HSN links down on blades that could not be added	nlrd	NE	["unknown"]	745}}@>
+756149	acg	2015-05-08 08:17:46	2015-05-08 08:17:46	Telling all blades to unthrottle network bandwidth. This should enable increased network injection.	nlrd	NE	["unknown"]	423
+<@\textbf{\textcolor{red}{756223	acg	2015-05-08 08:17:46	2015-05-08 08:17:46	Error during computation of network route	nlrd	NE	["unknown"]	749}}@>
+866808	acg	2015-05-08 08:17:46	2015-05-08 08:17:46	xtcli set_alert	1	commands	NE	["c0-0c0s9a0"]
+866328	acg	2015-05-08 08:30:21	2015-05-08 08:30:21	xtcli clr_alert	1	commands	NE	["c0-0c0s9a0"]
+<@\textbf{\textcolor{orange}{752224	acg	2015-05-08 08:31:24	2015-05-08 08:31:24	Marking HSN links down on blades that could not be added	nlrd	NE	["unknown"]	745}}@>
+756150	acg	2015-05-08 08:31:24	2015-05-08 08:31:24	Telling all blades to unthrottle network bandwidth. This should enable increased network injection.	nlrd	NE	["unknown"]	423
+<@\textbf{\textcolor{red}{756224	acg	2015-05-08 08:31:24	2015-05-08 08:31:24	Error during computation of network route	nlrd	NE	["unknown"]	749}}@>
+865971	acg	2015-05-08 08:31:24	2015-05-08 08:31:24	xtcli set_alert	1	commands	NE	["c0-0c0s9a0"]
+\end{annol}
+\caption{Output of query for network related annotations to investigate the cause of the failed routes. Complete output = 24 annotations}
+\label{f:routNEq}
+\end{figure*}
+
+This, thus drives us to investigate problems with \texttt{c0-0c0s9}. Query output is shown in figure~\ref{f:c0-0c0s9q}. The full output has 90 annotation, but there
+are only a few distinct ones (shown). Messages pertaining to the node (e.g, Error getting power status)(cyan) occur for all nodes on the blade and repeats (multiple nodes and repeats
+surpressed). There is an out-of-memory killer annotation (red) that occurs repeatedly (repeats suppressed in the figure). Of particular interest, is that the
+out of memory problem is reported by the blade controller (file is controllermessages and component is the blade), as opposed to a user process being killed by
+the OOM killer on a node.
+
+\RED{where do we go from here? look at the logs?}
+
+\begin{figure*}
+\begin{annol}
+python get.py -s "2015-05-08 08:00:00" -e "2015-05-08 08:35:00" -c c0-0c0s9 -f table annotations
+
+id	authorid	starttime	endtime	description	logfiles	LDcategory	components	balerpatternid
+<@\textbf{\textcolor{red}{864619	acg	2015-05-08 08:06:48	2015-05-08 08:06:48	OOM kill process.		controllermessages	NO	["c0-0c0s9"]	2971}}@>
+866418	acg	2015-05-08 08:11:40	2015-05-08 08:12:05	xtwarmswap remove	commands	NO	["c0-0c0s9"]
+865065	acg	2015-05-08 08:13:00	2015-05-08 08:13:16	xtcli power down	commands	PW	["c0-0c0s9"]
+865709	acg	2015-05-08 08:13:50	2015-05-08 08:15:12	xtcli power up	commands	PW	["c0-0c0s9"]
+<@\textbf{\textcolor{red}{864620	acg	2015-05-08 08:13:51     2015-05-08 08:13:51	OOM kill process.		controllermessages	NO	["c0-0c0s9"]	2971}}@>
+<@\textbf{\textcolor{red}{...REPEATS 6 Times}}@>
+865955	acg	2015-05-08 08:16:41	2015-05-08 08:17:46	xtwarmswap add	commands	NO	["c0-0c0s9"]
+864985	acg	2015-05-08 08:16:43	2015-05-08 08:16:43	xtcli clr_alert	commands	NO	["c0-0c0s9"]
+865485	acg	2015-05-08 08:16:43	2015-05-08 08:16:43	xtcli clr_warn	commands	NO	["c0-0c0s9"]
+865241	acg	2015-05-08 08:19:09	2015-05-08 08:19:09	xtwarmswap remove	commands	NO	["c0-0c0s9"]
+865015	acg	2015-05-08 08:19:58	2015-05-08 08:19:58	xtcli halt	commands	NO	["c0-0c0s9"]
+<@\textbf{\textcolor{red}{864624	acg	2015-05-08 08:21:01	2015-05-08 08:21:01	OOM kill process.	controllermessages	NO	["c0-0c0s9"]	2971}}@>
+<@\textbf{\textcolor{red}{...REPEATS 5 Times}}@>
+866482	acg	2015-05-08 08:21:21	2015-05-08 08:21:51	xtcli power down	commands	PW	["c0-0c0s9"]
+865041	acg	2015-05-08 08:25:08	2015-05-08 08:26:29	xtcli power up	commands	PW	["c0-0c0s9"]
+866012	acg	2015-05-08 08:30:18	2015-05-08 08:31:24	xtwarmswap add	commands	NO	["c0-0c0s9"]
+865948	acg	2015-05-08 08:30:21	2015-05-08 08:30:21	xtcli clr_alert	commands	NO	["c0-0c0s9"]
+866451	acg	2015-05-08 08:30:21	2015-05-08 08:30:21	xtcli clr_warn	commands	NO	["c0-0c0s9"]
+\end{annol}
+\caption{Output of query for annotations to investigate the cause of the component failure. Complete output = 90 annotations, about 10 of which are distinct. For example, the
+node-related annotations occur for each node on the blade and many repeat in time and are surpressed in the figure. An OOM killer event occurs which is reported by the blade
+controller, not a node.}
+\label{f:c0-0c0s9q}
+\end{figure*}
+
+
+Finally, we are interested in determining if this problem got resolved and how. We utilize the depth search
+\texttt{-d 1} to query parents (\texttt{c0-0c0}), children (the nodes and Aries), and any unknown/supremum components.
+The depth and time range currently
+are chosen by trial and error, however from output in Figure~\ref{f:routeresolution} it is clear that the OOM messages continue until a unsuccessful attempt is made to power
+down the blade (orange), and a few attempts are necessary to rebooted the system (red) and clear the alert (green). This case also illustrates
+the endstate field (which is automatically populated with the end state of commands in the command file (described in Section~\ref{s:annotations}))
+as well as the manual attribution to any annotations of events from the \texttt{command} file and \texttt{p0-XXX} directories. The latter are
+attributed to a generic \texttt{adm} for the annotation, as opposed to the human annotation of the blade reseating in the previous example.
+
+\begin{figure*}
+\begin{annol}
+python get.py -s "2015-05-08 08:35:00" -e "2015-05-08 23:35:00" -c c0-0c0s9 -d 1 -f table annotations
+
+id	authorid	starttime	endtime		endstate	description	manual	logfiles	LDcategory	components	balerpatternid
+<@\textbf{\textcolor{orange}{865860	acg	2015-05-08 08:40:24	2015-05-08 08:40:54	0	xtcli power down	1	commands	PW	["c0-0c0s9"]}}@>
+866403	acg	2015-05-08 08:51:18	2015-05-08 08:52:39	0	xtcli power up	1	commands	PW	["c0-0c0s9"]
+865969	acg	2015-05-08 09:04:56	2015-05-08 09:05:09	0	xtcli power up	1	commands	PW	["c0-0c0s9"]
+865426	acg	2015-05-08 10:55:04	2015-05-08 10:55:21	0	xtcli shutdown	1	commands	NO	["unknown"]
+865427	acg	2015-05-08 10:59:07	2015-05-08 10:59:08	0	xtcli clr_alert	1	commands	NO	["c0-0c0s9"]
+865429	acg	2015-05-08 10:59:07	2015-05-08 10:59:08	0	xtcli clr_alert	1	commands	NE	["c0-0c0s9a0"]
+866614	acg	2015-05-08 10:59:08	2015-05-08 11:00:13	0	xtcli halt	1	commands	NO	["unknown"]
+865078	acg	2015-05-08 11:00:29	2015-05-08 11:00:29	1	xtcli power on	1	commands	PW	["c0-0c0s9"]
+866365	acg	2015-05-08 11:00:42	2015-05-08 11:00:53	0	xtcli power up	1	commands	PW	["c0-0c0s9"]
+<@\textbf{\textcolor{orange}{766617	acg	2015-05-08 11:04:02	2015-05-08 11:04:02		Boot manager - halt request has failed		bm	NO	["unknown"]	15732}}@>
+866399	acg	2015-05-08 11:04:02	2015-05-08 11:04:02	0	xtcli halt	1	commands	NO	["c0-0c0s9"]
+865284	acg	2015-05-08 11:05:57	2015-05-08 11:05:57	1	xtcli power	1	commands	PW	["unknown"]
+<@\textbf{\textcolor{red}{74	adm	2015-05-08 11:15:31		reboot (p0)	1			NO	["unknown"]}}@>
+866035	acg	2015-05-08 11:15:42	2015-05-08 11:22:59	1	xtcli power up	1	commands	NO	["unknown"]
+866268	acg	2015-05-08 11:26:54	2015-05-08 11:26:54	0	xtcli slot_off	1	commands	NO	["c0-0c0s9"]
+864961	acg	2015-05-08 11:27:06	2015-05-08 11:27:06	1	xtcli power slot_off	1	commands	PW	["c0-0c0s9"]
+866436	acg	2015-05-08 11:27:18	2015-05-08 11:27:48	0	xtcli power down_slot	1	commands	PW	["c0-0c0s9"]
+<@\textbf{\textcolor{red}{75	adm	2015-05-08 11:55:20		reboot (p0)	1		NO	["unknown"]}}@>
+866564	acg	2015-05-08 11:55:35	2015-05-08 11:57:04	1	xtcli power down_slot	1	commands	NO	["unknown"]
+866547	acg	2015-05-08 12:42:12	2015-05-08 12:42:12	1	xtcli power slot_off	1	commands	PW	["c0-0c0s9"]
+866460	acg	2015-05-08 12:42:21	2015-05-08 12:42:52	0	xtcli power down_slot	1	commands	PW	["c0-0c0s9"]
+865783	acg	2015-05-08 12:43:11	2015-05-08 12:43:11	0	xtcli disable	1	commands	NO	["c0-0c0s9"]
+<@\textbf{\textcolor{red}{76	adm	2015-05-08 12:43:43		reboot (p0)	1			NO	["unknown"]}}@>
+864945	acg	2015-05-08 12:43:54	2015-05-08 12:50:15	0	xtcli disable	1	commands	NO	["unknown"]
+<@\textbf{\textcolor{green}{866412	acg	2015-05-08 12:50:18	2015-05-08 12:50:18	0	xtcli clr\_alert	1	commands	NE	["c0-0c0s9a0"]}}@>
+\end{annol}
+\caption{Output of query for annotations to investigate the resolution of the component failure. Attempts to address the blade itself were unsuccesful,
+and several reboots were required before the alert cleared.}
+\label{f:routeresolution}
+\end{figure*}
+
+\RED{Are the endstate codes rationale for this case?}
+
+
+
+\RED{get some numbers as to the number of raw log lines that would have to be searched through vs the number of annotations}

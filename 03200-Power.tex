@@ -1,0 +1,65 @@
+\subsection{Job Impact}
+\label{s:jobimpact}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We have annotated messages relating to potentially performance impacting conditions, including
+thermal throttling events, power budgets exceeded, and memory errors. Example annotation
+descriptions  include:
+\begin{itemize}
+\item \scriptsize\texttt{Correctable memory error.  This may result in degraded performance}\normalsize
+\item \scriptsize\texttt{Blade or Cabinet controller taking correctable memory errors. This may affect performance.}\normalsize
+\item \scriptsize\texttt{Package temperature above threshold (too hot). The CPU clock has been throttled. Should result in all threads for all cores will be throttled. This may affect application performance.}\normalsize
+\end{itemize}
+
+Of particular interest in XC systems is the ability to power cap. In such cases, not only is it of interest when
+the power budget is exceeded, but also when caps are applied, or perhaps fail to be applied. Our annotation
+system enables such events to be exposed to the user.
+Many of these messages are identified by commands in the \texttt{commands} file or in the \texttt{controller} logs
+and therefore are not typically released to users.
+\RED{does the user get warned if setting the power cap fails to be applied?}
+
+Examples include commands annotated as:
+\begin{itemize}
+\item \scriptsize\texttt{applying a power profile}\normalsize
+\item \scriptsize\texttt{enforcing a power limit}\normalsize
+\end{itemize}
+error messages annotated as:
+\begin{itemize}
+\item \scriptsize\texttt{Error getting initial node power status. This may affect power capping.}\normalsize
+\item \scriptsize\texttt{Error disabling power monitor. This may affect power capping.}\normalsize
+\item \scriptsize\texttt{Node Error setting power budget. This may affect power capping.}\normalsize
+\end{itemize}
+
+A fundamental goal of the annotations is to enable user to understanding why performance and power limits did not perform as expected.
+Basic capabilities enabled by our infrastructure include the ability to determine annotations occurring during a given job
+and jobs running while an annotation occurred. Examples of each are given in Figure~\ref{f:powerbudget}.
+In the top of the figure, all annotations during a job are queried -- it is seen that multiple times on multiple nodes, the
+power budget is exceeded, which may result in performance impact. In the bottom of the figure jobs running while an annotation occurs are queried. In this case,
+while the annotation was specific to node \texttt{c0-0c1s3n2}, the job itself was running on 96 nodes. Facilitating
+tracing the propagation of impact of an event is one of the design goals of this work.
+
+\begin{figure*}
+\begin{annol}
+
+# query for annotations during JobId 163510
+python get.py -j 163510  -f table annotations
+id	authorid	starttime	endtime		description	logfiles	LDcategory	components	balerpatternid
+<@\textbf{\textcolor{red}{855158	acg	2015-05-03 01:12:16	2015-05-03 01:12:16	Node power budget exceeded.	controllermessages	PW	["c0-0c1s3n2"]	2871}}@>
+<@\textbf{\textcolor{red}{864565	acg	2015-05-03 01:12:21	2015-05-03 01:12:21	Node now within power budget after it was exceeded.	controllermessages	PW	["c0-0c1s3n2"]	2872}}@>
+<@\textbf{\textcolor{red}{855159	acg	2015-05-03 01:12:22	2015-05-03 01:12:22	Node power budget exceeded.	controllermessages	PW	["c0-0c0s11n0"]	2871}}@>
+<@\textbf{\textcolor{red}{855160	acg	2015-05-03 01:12:23	2015-05-03 01:12:23	Node power budget exceeded.	controllermessages	PW	["c0-0c1s3n1"]	2871}}@>
+<@\textbf{\textcolor{red}{...Occurs multiple times for multiple nodes...}}@>
+
+
+# query for jobs running during annotation 864574
+python get.py --jobs 855158 -f table annotations
+JobId    UID    JobName    NumNodes    Start    End
+<@\textbf{\textcolor{red}{('163510', XXX, ``'xhpl''', 96, '2015-05-03 00:51:24', '2015-05-03 01:19:15')}}@>>
+
+\end{annol}
+\caption{Annotations provide access to power state information in otherwise unavailable logs. Basic implementation
+capabilities include discovery of annotations during a job (top) and and jobs running while an annotation occurred (bottom).}
+\label{f:powerbudget}
+\end{figure*}
+
+

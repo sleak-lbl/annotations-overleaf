@@ -1,0 +1,139 @@
+\subsection{HSN Congestion}
+\label{s:congestion}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In order to investigate network conditions, we chose to search for annotations involving the
+word ''congest''. Query results are given in Figure~\ref{f:congest}. This looks like the
+expected output of response to a congestion conditions, though it was suprising
+on a system of this size, with candidate nodes and applications
+as computed by the system.
+
+\begin{figure*}
+\begin{annol}
+python get.py  -t congest -f table annotations
+
+id	authorid	starttime	endtime		description	logfiles	LDcategory	components	balerpatternid
+756163	acg	2015-04-28 10:15:44	2015-04-28 10:15:44	System computing and listing congestion candidate applications		nlrd	NE	["unknown"]	704
+756168	acg	2015-04-28 10:15:44	2015-04-28 10:15:44	System computing and listing congestion candidate nodes		nlrd	NE	["unknown"]	705
+...
+756167	acg	2015-04-28 10:32:06	2015-04-28 10:32:06	System computing and listing congestion candidate applications		nlrd	NE	["unknown"]	704
+756172	acg	2015-04-28 10:32:06	2015-04-28 10:32:06	System computing and listing congestion candidate nodes		nlrd	NE	["unknown"]	705
+\end{annol}
+\caption{Congestion response annotations occur 5 times within 15 minutes. The annotation regarding
+candidate applications drove investigation of the \texttt{nlrd} log file, but no applications
+were listed.}
+\label{f:congest}
+\end{figure*}
+
+The annotation served as a guide to looking at the \texttt{nlrd} log to determine possible
+applications of interest. \RED{This type of investigation would be enabled by the
+full remote logset machinery}. There were, however, \emph{no} applications listed.
+As a result, we then queried for all annotations around this time window to find indication
+of a non-application congestion cause.
+
+A query for annotations between 10:00 and 10:32 on that day resulted in 300 annotations, however there are only 7 distinct ones.
+The reduction in log lines to annotation instances makes investigation of time ranges tractable and eases discovery
+of similar event instances. Other than the ones in Figure~\ref{f:congest}, the rest dealt with problems with a single component \texttt{c0-0c1s8a0n0} and system
+response to congestion.
+\begin{itemize}
+\item  192 occurences for component \texttt{c0-0c1s8a0n0} of \scriptsize\texttt{Correctable memory error.  This may result in degraded performance.}\normalsize
+\item  47 occurences for component \texttt{c0-0c1s8a0n0} of \scriptsize\texttt{Component failed.}\normalsize
+\item \scriptsize\texttt{Telling all blades to throttle network bandwidth. This should result in decreased network injection.}\normalsize
+\item \scriptsize\texttt{Telling all blades to unthrottle network bandwidth. This should enable increased network injection.}\normalsize
+\item \scriptsize\texttt{Unthrottling the service blades only}\normalsize
+\end{itemize}
+
+
+While we cannot be sure from the annotations alone that failure in this component was the cause of the congestion, it
+is clearly a strong suspect.
+
+Querying for annotations for \texttt{c0-0c1s8a0n0} revealed that the component's problems of these 2 types
+started on 2015-04-02 10:22:47 and ended on 2015-04-30 at 07:16:52.
+Narrowing down the root cause of the problems is difficult, however, because of a number of deliberately induced failures
+during facilities testing which occurred that day. While we have put in a manual annotation for \scriptsize\texttt{Facilities testing}\normalsize,
+the distributed system which we envision would have enabled the Facilities staff to annotate in more detail the exact testing which occurred.
+Currently the \scriptsize\texttt{Facilities testing}\normalsize annotation has to serve as a indicator to examine the logs in which
+indications of induced fan and power failures occurred.
+
+The resolution of the problem is discovered by using a depth search to query annotations of related components: here \texttt{-d 2}
+includes two levels of parents (\texttt{c0-0c1s8a0} and \texttt{c0-0c1s8}) children (none), and any unknown/supremum components.
+The depth was chosen with the expectation that resolution would occur due to actions at the Aries or blade level.
+
+While roughly 500 annotations occurred in response to the query,
+only about 30 distinct annotations occurred. The annotations make it easy to understand the sequence of events. Extracted annotations are in Figure~\ref{f:congestresolve}.
+First an annotation of a system administrator, 'abc', action, generically assigned to the day (green) confirms that the blade is being reseated in response
+to errors. Warmswaps of the blade occur (cyan), however, while the warmswaps report as successful, timeouts waiting for items in the Outstanding Request Buffer (ORB)
+result in the ORB being 'scrubbed', delaying the recovery (red). The annotations help with the understanding of the ORB scrub related events.
+Eventually the blade is added back (green) successfully and the blade is then booted.
+
+\begin{figure*}
+\begin{annol}
+
+python get.py  -c c0-0c1s8a0n0 -d 2 -s "2015-04-30 07:00:00" -e "2015-04-30 10:00:00" -f table annotations
+
+id	authorid	starttime	endtime		endstate    description	logfiles	LDcategory	components	balerpatternid
+
+<@\textbf{\textcolor{green}{4	abc	2015-04-30 00:00:01	2015-04-30 23:59:59	aries errors	blade reseated	Blade reseating in response to aries errors	NE	["c0-0c1s8"]}}@>
+<@\textbf{\textcolor{cyan}{865013	acg	2015-04-30 07:10:14	2015-04-30 07:10:15	1	xtwarmswap remove	commands	NO	["c0-0c1s8"]}}@>
+<@\textbf{\textcolor{cyan}{865797	acg	2015-04-30 07:15:50	2015-04-30 07:15:50	1	xtwarmswap remove	commands	NO	["c0-0c1s8"]}}@>
+<@\textbf{\textcolor{cyan}{866043	acg	2015-04-30 07:16:47	2015-04-30 07:16:47	1	xtwarmswap remove	commands	NO	["c0-0c1s8"]}}@>
+<@\textbf{\textcolor{cyan}{865976	acg	2015-04-30 07:16:55	2015-04-30 07:17:25	0	xtwarmswap remove	commands	NO	["unknown"]}}@>
+766569	acg	2015-04-30 07:16:56	2015-04-30 07:16:56		Handling Warm swap for partition.	nlrd	NO	["unknown"]	455
+866491	acg	2015-04-30 07:16:56	2015-04-30 07:16:56	0	xtcli set_alert		commands	NE	["c0-0c1s8a0"]
+752251	acg	2015-04-30 07:17:03	2015-04-30 07:17:03		Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
+756229	acg	2015-04-30 07:17:10	2015-04-30 07:17:10		Quiescing the network. This should result in decreased network injection.	nlrd	NE	["unknown"]	509
+756239	acg	2015-04-30 07:17:10	2015-04-30 07:17:10		Finished quiescing the network. (Is this just the steps in quiesce?).	nlrd	NE	["unknown"]	512
+865961	acg	2015-04-30 07:17:16	2015-04-30 07:17:23	0	xtcli set_alert		commands	NO	["unknown"]
+756132	acg	2015-04-30 07:17:25	2015-04-30 07:17:25		Telling all blades to unthrottle network bandwidth. This should enable increased network injection.	nlrd	NE	["unknown"]	423
+756249	acg	2015-04-30 07:17:25	2015-04-30 07:17:25		Unquiescing the network. This will allow normal traffic injection to resume.	nlrd	NE	["unknown"]	554
+756259	acg	2015-04-30 07:17:25	2015-04-30 07:17:25		Finished unquiescing the network. This will allow normal traffic injection to resume.	nlrd	NE	["unknown"]	557
+<@\textbf{\textcolor{green}{766581	acg	2015-04-30 07:17:25	2015-04-30 07:17:25		Warm swap was successful. This is in response to a operation intended to reset/reinit/replace a component (including network components).	nlrd	NO	["unknown"]	566}}@>
+766593	acg	2015-04-30 07:17:25	2015-04-30 07:17:25		The recovery operation for a failed link(s) was successful	nlrd	NE	["unknown"]	563
+766603	acg	2015-04-30 07:17:25	2015-04-30 07:17:25		Done handling warm swap. This may not necessarily indicate success (?). This is in response to a operation intended to reset/reinit/replace a component (including network components).		nlrd	NO	["unknown"]	561
+757133	acg	2015-04-30 07:17:42	2015-04-30 07:17:42		Starting to quiesce the node (node id might be in nodemask).		controllermessages	NE	["c0-0c1s8"]	2661
+758693	acg	2015-04-30 07:17:42	2015-04-30 07:17:42		Finished quiescing the node.		controllermessages	NE	["c0-0c1s8"]	2666
+<@\textbf{\textcolor{red}{763170	acg	2015-04-30 07:17:42	2015-04-30 07:17:42		Starting ORB scrub -- removing items in the Outstanding Request Buffer since its been too long for those messages	controllermessages	NE	["c0-0c1s8"]	2660}}@>
+764343	acg	2015-04-30 07:17:52	2015-04-30 07:17:52		Finishing ORB scrub -- done removing items in the Outstanding Request Buffer since its been too long for those messages	controllermessages	NE	["c0-0c1s8"]	2669
+760262	acg	2015-04-30 07:17:53	2015-04-30 07:17:53		Starting to unquiesce the node.		controllermessages	NE	["c0-0c1s8"]	2670
+761831	acg	2015-04-30 07:17:53	2015-04-30 07:17:53		Finished unquiescing the node.		controllermessages	NE	["c0-0c1s8"]	2676
+<@\textbf{\textcolor{red}{764926	acg	2015-04-30 07:17:53	2015-04-30 07:17:53		ORB timeout on node (nodes are in the message)		nlrd	NE	["unknown"]	435}}@>
+<@\textbf{\textcolor{red}{757134	acg	2015-04-30 07:17:54	2015-04-30 07:17:54		Starting to quiesce the node (node id might be in nodemask).		controllermessages	NE	["c0-0c1s8"]	2661}}@>
+758694	acg	2015-04-30 07:17:54	2015-04-30 07:17:54		Finished quiescing the node.		controllermessages	NE	["c0-0c1s8"]	2666
+<@\textbf{\textcolor{red}{763171	acg	2015-04-30 07:17:54	2015-04-30 07:17:54		Starting ORB scrub -- removing items in the Outstanding Request Buffer since its been too long for those messages	controllermessages	NE	["c0-0c1s8"]	2660}}@>
+764344	acg	2015-04-30 07:18:04	2015-04-30 07:18:04		Finishing ORB scrub -- done removing items in the Outstanding Request Buffer since its been too long for those messages	controllermessages	NE	["c0-0c1s8"]	2669
+760263	acg	2015-04-30 07:18:05	2015-04-30 07:18:05		Starting to unquiesce the node.		controllermessages	NE	["c0-0c1s8"]	2670
+761832	acg	2015-04-30 07:18:05	2015-04-30 07:18:05		Finished unquiescing the node.		controllermessages	NE	["c0-0c1s8"]	2676
+<@\textbf{\textcolor{red}{764927	acg	2015-04-30 07:18:05	2015-04-30 07:18:05		ORB timeout on node (nodes are in the message)		nlrd	NE	["unknown"]	435}}@>
+
+.....
+
+<@\textbf{\textcolor{green}{866031	acg	2015-04-30 07:56:36	2015-04-30 08:03:27	0	xtwarmswap add	1	commands	NO	["c0-0c1s8"]}}@>
+766571	acg	2015-04-30 07:56:39	2015-04-30 07:56:39		Handling Warm swap for partition.	nlrd	NO	["unknown"]	455
+865720	acg	2015-04-30 07:56:39	2015-04-30 07:56:40	0	xtcli clr_alert	1	commands	NO	["c0-0c1s8"]
+865819	acg	2015-04-30 07:56:39	2015-04-30 07:56:39	0	xtcli clr_alert	1	commands	NE	["c0-0c1s8a0"]
+866784	acg	2015-04-30 07:56:40	2015-04-30 07:56:40	0	xtcli clr_warn	1	commands	NO	["c0-0c1s8"]
+865012	acg	2015-04-30 07:56:46	2015-04-30 08:02:21	0	xtcli clr_warn	1	commands	NO	["c0-0c1s8"]
+752253	acg	2015-04-30 08:02:22	2015-04-30 08:02:22		Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
+756231	acg	2015-04-30 08:03:08	2015-04-30 08:03:08		Quiescing the network. This should result in decreased network injection.	nlrd	NE	["unknown"]	509
+756241	acg	2015-04-30 08:03:08	2015-04-30 08:03:08		Finished quiescing the network. (Is this just the steps in quiesce?).	nlrd	NE	["unknown"]	512
+756251	acg	2015-04-30 08:03:23	2015-04-30 08:03:23		Unquiescing the network. This will allow normal traffic injection to resume.	nlrd	NE	["unknown"]	554
+756261	acg	2015-04-30 08:03:23	2015-04-30 08:03:23		Finished unquiescing the network. This will allow normal traffic injection to resume.	nlrd	NE	["unknown"]	557
+756134	acg	2015-04-30 08:03:24	2015-04-30 08:03:24		Telling all blades to unthrottle network bandwidth. This should enable increased network injection.	nlrd	NE	["unknown"]	423
+<@\textbf{\textcolor{green}{766583	acg	2015-04-30 08:03:24	2015-04-30 08:03:24		Warm swap was successful. This is in response to a operation intended to reset/reinit/replace a component (including network components).	nlrd	NO	["unknown"]	566}}@>
+766595	acg	2015-04-30 08:03:24	2015-04-30 08:03:24		The recovery operation for a failed link(s) was successful	nlrd	NE	["unknown"]	563
+766605	acg	2015-04-30 08:03:24	2015-04-30 08:03:24		Done handling warm swap. This may not necessarily indicate success (?). This is in response to a operation intended to reset/reinit/replace a component (including network components).		nlrd	NO	["unknown"]	561
+<@\textbf{\textcolor{green}{865000	acg	2015-04-30 08:08:34	2015-04-30 08:08:39	0	xtcli boot	1	commands	NO	["c0-0c1s8"]}}@>
+\end{annol}
+\caption{A blade reseating was performed to resolve blade problems which led to the congestion event.
+Multiple iterations of scrubbing the Outstanding Request Buffer (ORB) were needed which
+delayed resolution. The annotation of the system administrator (identified by 'abc') action supports the diagnosis.
+}
+\label{f:congestresolve}
+\end{figure*}
+
+
+The annotations additionally make it easy to compare and investigate timescales of similar events. For instance,
+a recovery analysis might be based on the occurences and durtations of the warmswap sequences. This case
+might appear of longer duration that others, and the interveniening ORB scrubbing events that
+needed to be handled for full recovery would be easily apparent.
+
