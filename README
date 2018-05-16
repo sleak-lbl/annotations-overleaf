@@ -1,0 +1,76 @@
+Our sections, key points and how to arrange them all for a nice, coordinated flow:
+
+- (intro.tex) context, problem we are trying to solve   (aim for 1 page)
+     - key point is the summary statement
+
+- (requirements.tex) requirements for the solution  (aim for 1 page)
+     - key point is the list of identified requirements
+        1. agnostic
+        2. decentralized
+        3. low risk,effort
+        4. support advice from disparate sources
+        5. support discovery and filtering with related components
+        6. require no a priori knowledge of other collection and 
+           annotation efforts 
+
+- (solution.tex) our approach:  (aim 3 pages, might go to 4)
+
+     (v short outline, then sections:)
+
+     - (solution-01.tex) rdf vocab (1 page)
+          - bit of rdf background
+          - diagram and description of key elements
+        (what is key point?)
+
+     - (solution-02.tex) annotation schema (1 page)
+          - diagram? and description of key elements
+            (diagram of how annotations reduce the massive 
+            data volume to a tractable subset)
+         - splitting of physical, router and link architecture as ways to search a non-trivally-hierarchical
+           arcitecture for related components
+        (what is key point?)
+
+
+     - (solution-03.tex) summary of the tools/ prototypes (1 page)
+          - python module for building, maintaining and using a 
+            graph, and some prototype tools to help cataloging 
+            data and searching the graph
+          - get.py utility providing a user-friendy interface to the annotation
+            schema for some common query patterns
+           (wraps the sql and provides output formatting)
+        (what is key point?)
+
+- (methodology.tex) testing the approach: populating a graph and an annotation databasea (1 page)
+
+     - indexing the mutrino dataset with logs tool (if I can demo it ..) 
+
+     - populating an annotations database with machine-geneerated annotions from Baler
+       (recall that annotations might be human oversavations, results of analysis tools,
+       etc)
+
+- (examples.tex) case studies using the tool prototypes and sample schemas (3 pages) (1 each) 
+
+   - (examples-01.tex) job impact - "what hapened during my job" - find annotated events corresponding to the 
+     timeframe of the job and the components it utilized
+        key point: separation of non-sensitive annotations from sensitive logs 
+            allows operational failure analysis in a less stringent security domain
+
+   - hsn congestion - identifying a surprising degree of cngestion for the system and 
+     searching for "what jobs/applications were causing this revealed the surprising answer 
+     of "no jobs  are suspects", but highlighted issues with a specific node
+        key point - filtering data volume and combining sources enables surprising discoveries
+
+   - investigation into rererouting exposed that reroutes were failing, why? found 
+     problem comoonent and identified an OOM
+        - key point ?
+
+(conclusions.tex)
+
+
+try to get diagams on same page as descriptions of them
+
+
+aiming at about 10 pages? icluding diagrams, and easy to read (so summarize things into key 
+point cllouts? (but maybe just box them, with white background? or, just bold certain 
+parapgraphs?
+
