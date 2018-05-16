@@ -43,7 +43,7 @@ that it is called ``NERSC''. In reality, it is simply a URI within a
 namespace we control. But we can add more triples to the graph such as
 that our chosen URI has a ``name'' (using another pre-defined predicate)
 with the literal value ``NERSC''. Moreover, we can publish a document 
-at \texttt{<http://portal.nersc.gov/project/mpccc/sleak/nersc> containing 
+at \texttt{<http://portal.nersc.gov/project/mpccc/sleak/nersc>} containing 
 these and other triples. Now the URI we chose for NERSC corresponds to an 
 anchor within this document, so an application that encounters a reference 
 to this URI can fetch that document and infer more about NERSC.
@@ -67,25 +67,47 @@ namespace into the application's knowledge graph.
 
 Crucially, an RDF graph can be queried using SPARQL \textcolor{red}{cite}, a
 graph-query language with a look-and-feel similar to SQL. A SPARQL query 
-arranges variables into a set of triples and returns sets of URIs for which
+arranges variables into a set of triples and returns nodes for which
 the triples form a true statement. For example, the following SPARQL query
-will return the name and the web page for each node whose type is 
+will return the name and interest for each node whose type is 
 a subclass of \texttt{foaf:Agent}. \texttt{foaf:Agent} is a superclass for a Person, a 
 Group or an Organization, so this query in English is ``list the name and 
-webpage for each Person, Group or Organization in this graph''. (The 
+interest for each Person, Group or Organization in this graph''. (The 
 \texttt{rdfs:subClassOf*} syntax indicates that the query should follow 
 \texttt{rdfs:subClassOf} edges to any depth until a \texttt{foaf:Agent} 
 is encountered).
 
+Figure~\ref{f:sparql-diagram} illustrates how this query might act on a graph: 
+the first statement locates nodes from which one can traverse \texttt{rdfs:subClassOf} properties and reach a \texttt{foaf:Agent} - colored blue. The second statement 
+locates nodes in triples with an \texttt{rdfs:type} predicate whose object 
+is one found by the first statement - shown here in red. Thus far we have found Jim, 
+Ann, Annette and Steve. Next we look for triples whose subject is one of those nodes
+and whose predicate is \texttt{foaf:name}, reducing the set to Jim, Ann and Steve, then
+again for predicate \texttt{foaf:interest}. Now only Steve matches all of the criteria.
+Finally, we return the nodes associated with the \texttt{name} and \texttt{interest} 
+variables, which in this case are the purple-colored objects of those triples.
+
+
+\begin{figure}[H]
 \begin{minted}{sparql}
-SELECT ?name ?page 
-WHERE {
-    ?uri a ?type .
+SELECT ?name ?interest 
+WHERE {    
     ?type rdfs:subClassOf* foaf:Agent .
+    ?uri rdfs:type ?type .
     ?uri foaf:name ?name .
-    ?uri foaf:page ?page .
+    ?uri foaf:interest ?interest .
 }
 \end{minted}
+\caption{Example of a SPARQL query}
+\label{f:sparql}
+\end{figure}
+
+
+\begin{figure*}
+\includegraphics[width=0.9\textwidth]{sparql.png}
+\caption{Illustration of the SPARQL query in Figure~\ref{f:sparql} }
+\label{f:sparql-diagram}
+\end{figure*}
 
 \textcolor{red}{TODO: draw this as a diagram, probably explains it better}
 \textcolor{red}{TODO: prob need a ref to an "intro to semantic web" resource}
@@ -100,9 +122,16 @@ tools and libraries to achieve our goals.
 The key classes and predicates forming our vocabulary are illustrated in Figure~\ref{f:logset-classes}. The vocabulary is extended and specialized from the Data Catalog Vocabulary \textcolor{red}{cite}. The meaning, reason and usage of each are as follows:
 
 \begin{description}
-\item[LogSet] A collection of logs related in system and access and timespan,
+\item[Catalog] 
+The \texttt{dcat:Catalog} class is used as an access point to LogSet datasets and 
+to link disparate collections into a single graph. Catalogs are anticipated to be 
+published at a site granularity: staff at a site would publish the LogSets 
+at whatever URL each individual can access 
+\item[LogSet] 
+A collection of logs related in system and access and timespan,
 for example the logs collected in a \texttt{p0-} directory in the SMW of a Cray
-XC for a single boot session
+XC for a single boot session. A LogSet might be made available would normally be made available 
+
 \end{description}
 
 
@@ -122,7 +151,7 @@ XC for a single boot session
       solve specific access limitations in a locally-appropriate way
 \end{itemize}
 
- \begin{figure*}
+\begin{figure*}
 \includegraphics[width=0.9\textwidth]{logset-key-classes.png}
 \caption{Key classes and predicates in the logset vocabulary. }
 \label{f:logset-classes}
