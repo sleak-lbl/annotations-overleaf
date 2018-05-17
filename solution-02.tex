@@ -1,5 +1,29 @@
 \subsection{Annotation Schema}
 
+The specific requirements influencing the design of our annotation schema
+are:
+
+\begin{itemize}
+\item Temporal and subject (system and component) information are 
+      the key fields, along with a human readable description, the 
+      annotation itself.
+\item The raw logfiles that the annotation concerns should be identified,
+      if possible.
+\item Multiple people should be able to annotate the same underlying 
+      log data, and users of the annotations should be able to 
+      identify annotators to request more information, if necessary.  
+\item The architectural relationships between components indicated in 
+      annotations should be accessible, in order to facilitate 
+      traversal from an annotation of interest to annotations relating to
+      components that may have impacted it.
+\item Annotation fields should support searching based on the subject type 
+      of an annotated event (such as a network event) or other 
+      related information.
+\end{itemize}
+
+The annotation schema is an SQL database definition with a central ``annotations'' table. Significant fields in the annotations table are:
+
+
 In this subsection we describe the major fields necessary to support the
 architectural requirements that pertain to the annotations themselves
 (as opposed to the remote discovery infrastructure). The prototype
@@ -12,22 +36,22 @@ The annotations table is defined as:
 \begin{small}
 \begin{minted}{sql}
 CREATE TABLE 'annotations' (
-       'id' integer,
-       'authorid' char(3) NOT NULL,
-       'starttime' datetime NOT NULL,
-       'endtime' datetime NOT NULL,
-       'startstate' text,
-       'endstate' text,
+       'id'          integer,
+       'authorid'    char(3) NOT NULL,
+       -- a comment
+       'starttime'   datetime NOT NULL,
+       'endtime'     datetime NOT NULL,
+       'startstate'  text,
+       'endstate'    text,
        'description' text NOT NULL,
-       'manual' boolean,
-       'logfiles' text,
-       'system' text,
-       'systemdown' boolean,
-       'LDcatgroup' text \
-          REFERENCES 'LDgroups'('id'),
-       'LDcategory' text,
-       'LDtag' text,
-       'components' text,
+       'manual'      boolean,
+       'logfiles'    text,
+       'system'      text,
+       'systemdown'  boolean,
+       'LDcatgroup'  text REFERENCES 'LDgroups',
+       'LDcategory'  text,
+       'LDtag'       text,
+       'components'  text,
         balerpatternid integer,
         PRIMARY KEY('id','authorid')
         );

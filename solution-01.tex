@@ -1,13 +1,17 @@
 \subsection{RDF Vocabulary}
 
-The need for a decentralized mechanism for publishing information whose 
-\emph{meaning} is machine-readable has been known for more than two decades
-\textcolor{red}{cite https://www.w3.org/Talks/WWW94Tim/}. Since then a 
-collection of tools and technologies - the Semantic Web - has accumulated, with
-perhaps the most significant being the specification of RDF as a data 
-interchange format for the World Wide Web. \textcolor{red}{cite https://www.w3.org/RDF/?}
+A mechanism for decentralized description and discovery of data we proposed
+over two decades ago \textcolor{red}{cite https://www.w3.org/Talks/WWW94Tim/} 
+and exists now in the tools and technologies of the Semantic Web. Especially, 
+the specification of RDF as a data interchange format for the World Wide 
+Web. \textcolor{red}{cite https://www.w3.org/RDF/?}. Decoupling publication 
+from access meets many of our identified requirements (1, 4 and 5) and 
+using RDF to describe log data collections provides decentralization 
+and discovery without requiring a priori knowledge of other collection 
+efforts.
+
 In RDF \emph{things} (concepts or concrete items) are represented as URIs
-and arranged in \emph{triples} of a subject, a predicate and an object. 
+and arranged in \emph{triples} of a subject, a predicate and an object.  
 
 \begin{figure*}
 \begin{minted}{turtle}
@@ -34,39 +38,17 @@ meaning, including that \texttt{<http://www.w3.org/2000/01/rdf-schema\#type>}
 refers to the predicate ``is a''. Another vocabulary, known as the 
 Friend-of-a-friend vocabularies, associates \texttt{<http://xmlns.com/foaf/0.1/Organization>} with the concept of an 
 organization. In this spirit we write the triple in Figure~\ref{f:rdftriples}
-by associating the 
-we've chosen to associate the URI \texttt{<http://portal.nersc.gov/project/mpccc/sleak/nersc\#nersc>} with the 
+by associating a URI we've chosen: \texttt{<http://portal.nersc.gov/project/mpccc/sleak/nersc\#nersc>} with the 
 organization we know as ``NERSC''. 
 
-Notice that our URI doesn't actually say anything \emph{about} NERSC, not even 
-that it is called ``NERSC''. In reality, it is simply a URI within a 
-namespace we control. But we can add more triples to the graph such as
-that our chosen URI has a ``name'' (using another pre-defined predicate)
-with the literal value ``NERSC''. Moreover, we can publish a document 
-at \texttt{<http://portal.nersc.gov/project/mpccc/sleak/nersc>} containing 
-these and other triples. Now the URI we chose for NERSC corresponds to an 
-anchor within this document, so an application that encounters a reference 
-to this URI can fetch that document and infer more about NERSC.
+A single triple tells us very little, but a collection of many triples 
+forms a graph representing almost arbitrary knowledge graph. We get 
+decentralization by the use of URIs as graph elements - any contributer 
+can publish a set of triples and, so long as \emph{somebody} is aware of 
+it, it can be incorporated into a global graph.
 
-% this is a key point
-\begin{keypoint}
-A collection of triples forms a graph whose edges have well-defined meanings, 
-allowing information about nodes to be inferred from their relationships to 
-other nodes.
-\end{keypoint}
-
-Note that in the example we defined prefixes and used a shorthand form of 
-the URIs. A variety of syntaxes exist to describe RDF in a more human-readable
-manner, so for the remainder of this article we will use this \texttt{Turtle}
-syntax. 
-
-By using web-based URIs as identifiers we get a mechanism for a distributed,
-decentralized graph of knowledge. An application encountering a URI can 
-choose to simply accept it as a unique identifier, or to incorporate its
-namespace into the application's knowledge graph.
-
-Crucially, an RDF graph can be queried using SPARQL \textcolor{red}{cite}, a
-graph-query language with a look-and-feel similar to SQL. A SPARQL query 
+The other Semantic Web element key to our requirements is the SPARQL 
+graph query language. A SPARQL query 
 arranges variables into a set of triples and returns nodes for which
 the triples form a true statement. For example, the following SPARQL query
 will return the name and interest for each node whose type is 
@@ -76,17 +58,6 @@ interest for each Person, Group or Organization in this graph''. (The
 \texttt{rdfs:subClassOf*} syntax indicates that the query should follow 
 \texttt{rdfs:subClassOf} edges to any depth until a \texttt{foaf:Agent} 
 is encountered).
-
-Figure~\ref{f:sparql-diagram} illustrates how this query might act on a graph: 
-the first statement locates nodes from which one can traverse \texttt{rdfs:subClassOf} properties and reach a \texttt{foaf:Agent} - colored blue. The second statement 
-locates nodes in triples with an \texttt{rdfs:type} predicate whose object 
-is one found by the first statement - shown here in red. Thus far we have found Jim, 
-Ann, Annette and Steve. Next we look for triples whose subject is one of those nodes
-and whose predicate is \texttt{foaf:name}, reducing the set to Jim, Ann and Steve, then
-again for predicate \texttt{foaf:interest}. Now only Steve matches all of the criteria.
-Finally, we return the nodes associated with the \texttt{name} and \texttt{interest} 
-variables, which in this case are the purple-colored objects of those triples.
-
 
 \begin{figure}[H]
 \begin{minted}{sparql}
@@ -102,6 +73,15 @@ WHERE {
 \label{f:sparql}
 \end{figure}
 
+Figure~\ref{f:sparql-diagram} illustrates how this query might act on a graph: 
+the first statement locates nodes from which one can traverse \texttt{rdfs:subClassOf} properties and reach a \texttt{foaf:Agent} - colored blue. The second statement 
+locates nodes in triples with an \texttt{rdfs:type} predicate whose object 
+is one found by the first statement - shown here in red. Thus far we have found Jim, 
+Ann, Annette and Steve. Next we look for triples whose subject is one of those nodes
+and whose predicate is \texttt{foaf:name}, reducing the set to Jim, Ann and Steve, then
+again for predicate \texttt{foaf:interest}. Now only Steve matches all of the criteria.
+Finally, we return the nodes associated with the \texttt{name} and \texttt{interest} 
+variables, which in this case are the purple-colored objects of those triples.
 
 \begin{figure}
 \includegraphics[width=0.4\textwidth]{sparql.png}
@@ -109,13 +89,8 @@ WHERE {
 \label{f:sparql-diagram}
 \end{figure}
 
-\textcolor{red}{TODO: draw this as a diagram, probably explains it better}
-\textcolor{red}{TODO: prob need a ref to an "intro to semantic web" resource}
+\textcolor{red}{TODO: might need a ref to an "intro to semantic web" resource}
 
-RDF provides a decentralized mechanism for publishing information in a
-machine-readable and searchable way, neatly meeting our requirements
-(2) and (5). Furthermore, RDF allows us to use an established ecosystem of 
-tools and libraries to achieve our goals.
 
 \subsubsection{The vocabulary}
 
