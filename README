@@ -6,12 +6,12 @@ Our sections, key points and how to arrange them all for a nice, coordinated flo
 - (requirements.tex) requirements for the solution  (aim for 1 page)
      - key point is the list of identified requirements
         1. agnostic
-        2. decentralized
-        3. low risk,effort
-        4. support advice from disparate sources
-        5. support discovery and filtering with related components
-        6. require no a priori knowledge of other collection and 
+        2. require no a priori knowledge of other collection and 
            annotation efforts 
+        3. decentralized
+        4. low risk,effort
+        5. support advice from disparate sources
+        6. support discovery and filtering with related components
 
 - (solution.tex) our approach:  (aim 3 pages, might go to 4)
 
