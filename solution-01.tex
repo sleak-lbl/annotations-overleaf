@@ -1,11 +1,12 @@
 \subsection{RDF Vocabulary}
 
-A mechanism for decentralized description and discovery of data we proposed
+A mechanism for decentralized description and discovery of data was proposed
 over two decades ago \textcolor{red}{cite https://www.w3.org/Talks/WWW94Tim/} 
-and exists now in the tools and technologies of the Semantic Web. Especially, 
-the specification of RDF as a data interchange format for the World Wide 
-Web. \textcolor{red}{cite https://www.w3.org/RDF/?}. Decoupling publication 
-from access meets many of our identified requirements (1, 4 and 5) and 
+and exists now in the tools and technologies of the Semantic Web. The 
+specification of RDF as a data interchange format for the World Wide 
+Web. \textcolor{red}{cite https://www.w3.org/RDF/?} is particularly relevant 
+to our identified requirements. Decoupling publication 
+from access meets many of these requirements (1, 4 and 5) and 
 using RDF to describe log data collections provides decentralization 
 and discovery without requiring a priori knowledge of other collection 
 efforts.
@@ -74,14 +75,14 @@ WHERE {
 \end{figure}
 
 Figure~\ref{f:sparql-diagram} illustrates how this query might act on a graph: 
-the first statement locates nodes from which one can traverse \texttt{rdfs:subClassOf} properties and reach a \texttt{foaf:Agent} - colored blue. The second statement 
-locates nodes in triples with an \texttt{rdfs:type} predicate whose object 
-is one found by the first statement - shown here in red. Thus far we have found Jim, 
+the first statement locates nodes - colored blue - from which one can traverse \texttt{rdfs:subClassOf} edges and reach a \texttt{foaf:Agent}. The second statement 
+locates nodes (shown in red) in triples with an \texttt{rdfs:type} predicate whose object 
+is one found by the first statement. Thus far we have found Jim, 
 Ann, Annette and Steve. Next we look for triples whose subject is one of those nodes
 and whose predicate is \texttt{foaf:name}, reducing the set to Jim, Ann and Steve, then
 again for predicate \texttt{foaf:interest}. Now only Steve matches all of the criteria.
 Finally, we return the nodes associated with the \texttt{name} and \texttt{interest} 
-variables, which in this case are the purple-colored objects of those triples.
+variables, which in this case are the nodes show in purple.
 
 \begin{figure}
 \includegraphics[width=0.4\textwidth]{sparql.png}
@@ -94,31 +95,47 @@ variables, which in this case are the purple-colored objects of those triples.
 
 \subsubsection{The vocabulary}
 
+\begin{figure*}
+\includegraphics[width=1.0\textwidth]{logset-key-classes.png}
+\caption{Key classes and predicates in the logset vocabulary. }
+\label{f:logset-classes}
+\end{figure*}
+
 The key classes and predicates forming our vocabulary are illustrated in 
 Figure~\ref{f:logset-classes}. Figure~\ref{f:logset-classes-nodes} provides 
-examples of nodes in a graph corresponding to each class, and an 
-illustration of how RDF descriptions of different \texttt{LogSet}s published 
-in different places form a single, global graph is show in 
-Figure~\ref{f:logset-example}. Particularly, Figure~\ref{f:logset-example}
-shows how the vocabulary can be used to publish data dictionaries 
-describing different \texttt{SubjectType}s and \texttt{LogSeries}.
+examples of nodes in a graph corresponding to each class, and 
+Figure~\ref{f:logset-example} shows how RDF descriptions of different
+\texttt{LogSet}s published in different places form a single, global graph.
+Figure~\ref{f:logset-example} also shows how data dictionaries 
+describing different \texttt{SubjectType}s and \texttt{LogSeries} can be 
+published and become part of the global graph when used.
+
+
+\begin{figure*}
+\includegraphics[width=0.9\textwidth]{logset-classes-nodes.png}
+\caption{Examples of nodes in the graph and how they relate to
+vocabulary classes}
+\label{f:logset-classes-nodes}
+\end{figure*}
+
+\begin{figure*}
+\includegraphics[width=0.9\textwidth]{logset-example.png}
+\caption{Examples of some nodes and relationships published in different places 
+from different sites (indicated via color), forming a single global graph. }
+\label{f:logset-example}
+\end{figure*}
 
 The vocabulary is extended and specialized 
 from the Data Catalog Vocabulary \textcolor{red}{cite}. The meaning, 
-reason and usage of each are as follows:
+reason and usage of some key classes and properties:
 
 \begin{description}
 \item[Catalog] \hfill
 
-The \texttt{dcat:Catalog} class is used as an access point to LogSet datasets and 
-to link disparate collections into a single graph. Catalogs are anticipated to be 
-published at a site granularity: staff at a site would publish LogSets under
-a URL that the staff member can access, linked to the global graph via a single 
-entry in the site Catalog. (The mechanism for this can be as simple as a pull
-request to a Github repository).
-
-\texttt{Catalog}s can use \texttt{rdfs:seeAlso} properties to link to other 
-catalogs and to data dictionary
+The \texttt{dcat:Catalog} class connects \texttt{LogSet}s and also, via 
+\texttt{rdfs:seeAlso}, other catalogs. This is the primary mechanism for 
+linking sites into a global graph: we anticipate that each site will 
+publish a catalog to which its own staff can contribute \texttt{LogSet}s, and which is linked to a few other sites via \texttt{rdfs:seeAlso}.
 
 \item[LogSet] \hfill
 
@@ -126,104 +143,75 @@ A collection of logs related in system and access and timespan,
 for example the logs collected in a \texttt{p0-} directory in the SMW of a Cray
 XC for a single boot session. The \texttt{LogSet} should provide a description
 of the data and contact information and is an entry point to metadata for 
-the \texttt{ConcreteLog}s.
+the \texttt{ConcreteLog}s. Temporal and subject information for the \texttt{LogSet}
+can be infered from those properties of its \texttt{ConcreteLog}s.
 
-Note that the \texttt{LogSet} itself doesn't necessarily have properties for 
-temporal or subject information. We anticipate that these would be derived 
-from the \texttt{ConcreteLog}s comprising the \texttt{LogSet}.
-
-A \texttt{LogSet} might be a closed archive or might be ``open'', that is' 
-acquiring new logs over time. This is indicated via the \texttt{isClosed} 
-property, ..
+A \texttt{LogSet} might be a closed archive or might be ``open'',
+acquiring new logs over time. 
 
 \item[ConcreteLog] \hfill
 
 A \texttt{ConcreteLog} describes a specific, concrete source of log entries.
-This might be a log file but could also be, for example, a Slurm instance
+This will often be a log file but could also be, for example, a Slurm instance
 from which job data can be obtained. 
 
 The \texttt{accessURL} and \texttt{downloadURL} have subtly different uses,
-inherited from \texttt{dcat:Distribution}. The actual data described by the 
-\texttt{ConcreteLog} may not be directly accessible (due to security or 
-other practical constraints), in which case an \texttt{accessURL} which 
-can help a user to learn about gaining access is more suitable than a 
-\texttt{downloadURL}, which is expected to provide direct access to the 
-data.
+inherited from \texttt{dcat:Distribution}. Where security or practical 
+constraints preclude direct download of data, \texttt{accessURL} can be used 
+instead to find more information (such as how to request access).
 
-
-The \texttt{ConcreteLog} also supports a number of properties about the
-size, number of records and timespan of the data. For many data sources 
-an ill-considered query might result in an excessive volume of data returned,
-so these properties are intended to help users check 
-
+The \texttt{ConcreteLog} should also include the 
+start and (optional) end dates encompassed by the log. Inclusion of 
+information about the size and number of records is also recommended, as a
+means of avoiding download of excessively large data volumes.
 
 \item[LogSeries] \hfill
 
-The console log for a server is often distributed over multiple files,
-and is fundamentally the same for servers of the same make at different
-sites. A \texttt{LogSeries} allows the common metadata to be published
-once in a common dictionary...
+Most log data can be classified into a few \emph{series}, such as 
+``console log files'' or ``Slurm job records''. \texttt{ConcreteLog}s
+within a \texttt{LogSeries} have the same structure but span different 
+times or subjects. A \texttt{LogSeries} is often common to systems from a
+given vendor and is expected to be published in a common dictionary.
 
+\item[LogFormatType] \hfill
 
-\item[LogFormatType]
+The \texttt{LogFormatType} gives hints to tools about how a particular
+\texttt{LogSeries} should be handled. For example, many logs are in the
+form of a \texttt{timeStampedLogFile}. Series-specific details such 
+as how to identify the timestamp of a record is published in the 
+\texttt{logFormatInfo} property of the \texttt{LogSeries}.
+ 
+\item[Subject] \hfill
 
-One level more general than a \texttt{LogSeries}, a \texttt{LogFormatType}
-is common to many \texttt{LogSeries}. As an example, many \texttt{LogSeries}
-have the form of a \texttt{timeStampedLogFile}. Another significant 
-\texttt{LogFormatType} is \texttt{sqlite3DB} (which encapsulates our 
-reference implementation of the Annotation Schema~\textcolor{red}{cross-ref})
+Logs are about \emph{something} - e.g. the cluster, a specific service
+node or the filesystem, so each \texttt{ConcreteLog} should indicate
+this. Subjects mostly correspond to Cluster components, and can be 
+assembled into a hierarchy via a \texttt{partOf} property. Not all 
+relationships are hierarchical - for example a network link impacts
+the device on each end - so we support a weaker relationship 
+\texttt{affects} as well.
 
-\item[Subject]
-...
-affects and partOf
+\item[SubjectType] \hfill
 
+In the same way that \texttt{ConcreteLog}s can be classified into 
+\texttt{LogSeries}, \texttt{Subject}s can be classified into 
+\texttt{SubjectType}s. An example \texttt{SubjectType} is ``cluster'',
+compared to an example \texttt{Subject}, NERSC Cori. During the
+procedure of cataloging LogSets, the graph can be queried to see that
+a specific \texttt{LogSeries} is about a \texttt{SubjectType} 
+\texttt{hsn}, from which tools can infer that a specific 
+\texttt{ConcreteLog} should be associated with \texttt{cori\_hsn}.
+(This inference capability is essential when cataloging thousands of 
+log files)
 
-
-\item[SubjectType]
-
-Each \texttt{ConcreteLog} has a specific \texttt{Subject} - e.g. a 
-\texttt{cori} or \texttt{cori\_nid00123}. It is useful to classify 
-\texttt{Subject}s by their type so that for example, a researcher 
-seeking HSN data can find \texttt{ConcreteLog}s about the HSN 
-component of multiple clusters by querying for \texttt{ConcreteLogs}
-whose \texttt{subject} is a specific \texttt{subjectType}. 
-
-This also supports cataloging new datasets: rather than asking the
-user the \texttt{subject} of each \texttt{ConcreteLog}, we can 
-
-skos:broader, also aspectof
-
+\texttt{SubjectType} based on the \texttt{skos:Concept}, through 
+which \texttt{SubjectType}s can be classified as broader or narrower
+that each other (``network'' is a broader concept than ``AriesHSN'').
 
 \end{description}
 
--- some key things to call out:
-\begin{itemize}
-\item someone publishing a logset doesn't need to know many people to get their 
-      logset into the graph - a curator of their local (site) catalog is enough. 
-      That curator then knows curators of at least one other catalog and thus 
-      gets the local 
-      subgraph into the global graph
-\item someone using the graph doesn't need to know who published what - they can
-      query the graph itself and get metadata about what is out there, including contact 
-      information for data they don't directly have access to. This allows them to 
-      solve specific access limitations in a locally-appropriate way
-\end{itemize}
 
-\begin{figure*}
-\includegraphics[width=1.0\textwidth]{logset-key-classes.png}
-\caption{Key classes and predicates in the logset vocabulary. }
-\label{f:logset-classes}
-\end{figure*}
 
-\begin{figure*}
-\includegraphics[width=0.9\textwidth]{logset-classes-nodes.png}
-\caption{Examples of some nodes and relationships published in different places 
-from different sites (indicated via color), forming a single global graph. }
-\label{f:logset-classes-nodes}
-\end{figure*}
 
-\begin{figure*}
-\includegraphics[width=0.9\textwidth]{logset-example.png}
-\caption{Key classes and predicates in the logset vocabulary. }
-\label{f:logset-example}
-\end{figure*}
+
+
