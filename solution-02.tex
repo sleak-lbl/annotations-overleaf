@@ -1,8 +1,17 @@
 \subsection{Annotation Schema}
 
-The primary goal of annotation is to provide a reduced
-Some specific requirements influencing the design of our annotation schema
-are:
+The primary goal of annotation is to provide a reduced set of searchable,
+understandable data that can hint at relationships between logged 
+events and guide the user to further searches and to interesting locations
+in the raw log data. Along with our identified requirements, this 
+provides some design requirements for the schema:
+
+\begin{figure}
+\includegraphics[width=0.4\textwidth]{annotations.png}
+\caption{Annotations provide reduced, tractable view of significant events
+in a much larger volume of log data.}
+\label{f:annotations}
+\end{figure}
 
 \begin{itemize}
 \item 
@@ -23,19 +32,6 @@ are:
       related information.
 \end{itemize}
 
-
-
-\begin{figure}
-\includegraphics[width=0.4\textwidth]{annotations.png}
-\caption{Annotations can collate a tractable subset of data from multiple log files into a single location.  }
-\label{f:annotations}
-\end{figure}
-
-\begin{description}
-\item[Catalog] \hfill
-
-\end{description}
-
 %In this subsection we describe the major fields necessary to support the
 %architectural requirements that pertain to the annotations themselves
 %(as opposed to the remote discovery infrastructure). The prototype
@@ -43,9 +39,10 @@ are:
 %of that implemention, however that is not required. More generally
 %this would be descirbed in terms of accessor APIs independent of
 %the implementation beneath them.
-The annotation schema is an SQL database definition with a central ``annotations'' table. Significant fields in the annotations table are:
+Our annotation schema is an SQL database definition with a central 
+``annotations'' table:
 
-The annotations table is defined as:
+\begin{figure}[H]
 \begin{small}
 \begin{minted}{sql}
 CREATE TABLE 'annotations' (
@@ -74,40 +71,42 @@ CREATE TABLE 'annotations' (
         );
 \end{minted}
 \end{small}
+\caption{The central annotations table definition. }
+\label{f:ann-table}
+\end{figure}
 
-The major fields for an annotations include \texttt{description}, \texttt{starttime}, \texttt{end time},
-\texttt{system}, and \texttt{components} involved.
-The description is a descriptive translation of a log messge or event (Examples
-are given in Section~\ref{s:examples}); it is this description to which we
-mainly refer when we refer to an annotation.
-The \texttt{authorid} identifies the author of an annotation, who
-is responsible for the determination of the content of the assignable fields
-(such as the description); the authorid and annotation id together form a unique key.
-Time and component fields refer to a specific instance of a log line or event
-occurence. Thus multiple annotated log line instances may share the same description,
-but have different time and component values.
+The id, source, description and temporal fields are self-explanatory. 
+The impact fields are designed to aid exploratory analysis, for example
+\texttt{startstate} and \texttt{endstate} can be used to indicate that
+a component that was in a \texttt{faulty} was either \texttt{repaired}
+or \texttt{flagged} by the end of the event. A \texttt{systemdown} flag
+allows search for events resulting in a full system failure.
 
-Other information is used to help with context and search.
-For example, \texttt{startstate} and \texttt{endstate}, which
-are subjective and can be used to record things like a component
-that starts a faulty but is repaired by the action of the annotations,
-for example, if the event is recording that a DIMM was changed.
-\texttt{Systemdown} is meant to aid in the search for events that result
-in full system failure.
+The \texttt{system} and \texttt{components} fields correspond to the 
+\texttt{Subject} class of the RDF vocabulary.
+For the Cray system we define \texttt{node}, \texttt{blade}, \texttt{chassis},
+\texttt{cabinet}, \texttt{router}, \texttt{tile}, \texttt{link}, \texttt{nic},
+\texttt{smw}, and \texttt{other}, all of which (except \texttt{other}) are 
+also \texttt{SubjectType}s described in RDF in data dictionaries and can, in
+combination with the \texttt{system}, identify a specific component.
 
-\texttt{Manual} is used to indicate manually performed
-events, such as an administrator action to take down a node as opposed
+The \texttt{components} may be identified with finer granularity than
+is represented in the RDF graph - for example \texttt{c0-1c0s4n0}. One 
+envisioned source of machine-generated annotations is LogDiver~\cite{LogDiver}, 
+a tool developed by UIUC which associates regular expressions defining
+events in log files of interest with categorizations including 
+\texttt{node/blade},
+\texttt{scheduler}, \texttt{storage}, \texttt{network}, \texttt{cooling/facilities/sensors},
+\texttt{power}, \texttt{system software}, \texttt{datawarp}, and \texttt{unknown}.
+These also correspond to \texttt{SubjectType}s in an RDF dictionary.
+
+The \texttt{manual} flag indicates that an event was manually induced,
+such as an administrator action to take down a node as opposed
 to the system taking down a node because it failed a health check.
 Knowledge of this can be used to more accurately determine the
 number of true failure events and for assessing the effectiveness
-and availability of system resilience mechansims vs required
-human intervention.
+and availability of system resilience mechanisms
 
-A set of fields, \texttt{LDXXX} are available to give contextual inforatmion.
-At the moment only \texttt{LDcategory} is used; this is used to define the major
-subsystem relevant to the annotation. The current options are: \texttt{node/blade},
-\texttt{scheduler}, \texttt{storage}, \texttt{network}, \texttt{cooling/facilities/sensors},
-\texttt{power}, \texttt{system software}, \texttt{datawarp}, and \texttt{unknown}.
 
 Note that event may have many relationships. We choose to limit them to one each to address
 the requirement of searchability. It is expected that exploration will facilitate dsicovery
