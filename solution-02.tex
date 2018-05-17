@@ -1,9 +1,11 @@
 \subsection{Annotation Schema}
 
-The specific requirements influencing the design of our annotation schema
+The primary goal of annotation is to provide a reduced
+Some specific requirements influencing the design of our annotation schema
 are:
 
 \begin{itemize}
+\item 
 \item Temporal and subject (system and component) information are 
       the key fields, along with a human readable description, the 
       annotation itself.
@@ -21,44 +23,54 @@ are:
       related information.
 \end{itemize}
 
-The annotation schema is an SQL database definition with a central ``annotations'' table. Significant fields in the annotations table are:
+
 
 \begin{figure}
 \includegraphics[width=0.4\textwidth]{annotations.png}
-\caption{Annotations can collate a tractable subset of data from multiple log files into a single location  }
+\caption{Annotations can collate a tractable subset of data from multiple log files into a single location.  }
 \label{f:annotations}
 \end{figure}
 
-In this subsection we describe the major fields necessary to support the
-architectural requirements that pertain to the annotations themselves
-(as opposed to the remote discovery infrastructure). The prototype
-implementation is an SQLite database, so we descirbe in in terms
-of that implemention, however that is not required. More generally
-this would be descirbed in terms of accessor APIs independent of
-the implementation beneath them.
+\begin{description}
+\item[Catalog] \hfill
+
+\end{description}
+
+%In this subsection we describe the major fields necessary to support the
+%architectural requirements that pertain to the annotations themselves
+%(as opposed to the remote discovery infrastructure). The prototype
+%implementation is an SQLite database, so we descirbe in in terms
+%of that implemention, however that is not required. More generally
+%this would be descirbed in terms of accessor APIs independent of
+%the implementation beneath them.
+The annotation schema is an SQL database definition with a central ``annotations'' table. Significant fields in the annotations table are:
 
 The annotations table is defined as:
 \begin{small}
 \begin{minted}{sql}
 CREATE TABLE 'annotations' (
-       'id'          integer,
-       'authorid'    char(3) NOT NULL,
-       -- a comment
-       'starttime'   datetime NOT NULL,
-       'endtime'     datetime NOT NULL,
-       'startstate'  text,
-       'endstate'    text,
-       'description' text NOT NULL,
-       'manual'      boolean,
-       'logfiles'    text,
-       'system'      text,
-       'systemdown'  boolean,
-       'LDcatgroup'  text, REFERENCES 'LDgroups'
-       'LDcategory'  text,
-       'LDtag'       text,
-       'components'  text,
-        balerpatternid integer,
-        PRIMARY KEY('id','authorid')
+       id             integer,
+       authorid       char(3) NOT NULL,
+       description    text NOT NULL,
+       -- timespan of the action or event:
+       starttime      datetime NOT NULL,
+       endtime        datetime NOT NULL,
+       -- impact of the action or event:
+       startstate     text,
+       endstate       text,
+       systemdown     boolean,
+       system         text,
+       components     text,
+       -- was the event manually induced?
+       manual         boolean,
+       -- subject type and annotation context:
+       LDcatgroup     text, REFERENCES 'LDgroups'
+       LDcategory     text,
+       LDtag          text,
+       balerpatternid integer,
+       -- event source:
+       logfiles       text,
+       PRIMARY KEY('id','authorid')
         );
 \end{minted}
 \end{small}
