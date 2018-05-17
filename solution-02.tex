@@ -48,7 +48,7 @@ CREATE TABLE 'annotations' (
        'logfiles'    text,
        'system'      text,
        'systemdown'  boolean,
-       'LDcatgroup'  text REFERENCES 'LDgroups',
+       'LDcatgroup'  text, REFERENCES 'LDgroups'
        'LDcategory'  text,
        'LDtag'       text,
        'components'  text,
@@ -61,7 +61,7 @@ CREATE TABLE 'annotations' (
 The major fields for an annotations include \texttt{description}, \texttt{starttime}, \texttt{end time},
 \texttt{system}, and \texttt{components} involved.
 The description is a descriptive translation of a log messge or event (Examples
-are given in Section~\ref{s:annotations}); it is this description to which we
+are given in Section~\ref{s:examples}); it is this description to which we
 mainly refer when we refer to an annotation.
 The \texttt{authorid} identifies the author of an annotation, who
 is responsible for the determination of the content of the assignable fields
