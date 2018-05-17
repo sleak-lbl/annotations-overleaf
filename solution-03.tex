@@ -8,11 +8,7 @@
 \end{itemize}
 
 from intro:
-      While nothing prevents annotators and researchers from directly
-      annotating, describing and querying collections with SQL and RDF,
-      the learning curve for these technologies presents an entry
-      barrier to the time-constrained individuals who would otherwise
-      benefit from it.
+
 
       Many interactions with annotated, discoverable log data can be
       can be described in just a few use cases:
@@ -37,6 +33,33 @@ from intro:
 
 
 - talk about why, eg rdf because it is machine readable, supports adding tools etc over time 
+
+\subsubsection{Cataloging log sources and archives}
+
+There is no technical issue preventing someone from cataloging a dataset 
+by manually writing and publishing RDF files, the process is laborious 
+and error prone: a good candidate for automation. Similarly, queries 
+can be run on the graph through any SPARQL endpoint, but the learning 
+curve is significant.
+
+To enable easy use of the RDF graph we have developed a framework, in 
+the form of a python package \textcolor{red}{cite github address?}
+for constructing and querying the graph. The package is still pre-release
+and in active development, so far its capability is limited to 
+walking a directory tree to discover and catalog log files - with 
+some constraints on the types of log files it can inspect - and some 
+basic query abilities. The package is extensible: handlers for 
+file and log format types follow a small interface
+
+Much information must be collected to create useful metadata: most of
+this can be automatically inferred by querying the graph and inspecting 
+the file (for example, the filename hints at the likely \texttt{LogSeries},
+temporal boundaries can be discovered by reading the first and last records
+and the subjects for a tree of log data can be inferred from 
+
+
+
+
 
 \subsubsection{Creating Annotations}
 \label{s:creating}
@@ -87,7 +110,7 @@ for reference ease; only the annotation description, not the original log line n
 are stored in the annotation database.
 
 Some example patterns, from which the originating log line will be obvious, and
-the resulting annotation used in this work, are given in Figure~\ref{f:baler}
+the resulting annotation used in this work, are given in Figure~\ref{f:baler}.
 
 \begin{figure*}
 \begin{annol}
