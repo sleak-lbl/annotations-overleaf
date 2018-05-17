@@ -31,6 +31,8 @@ in a much larger volume of log data.}
       related information.
 \end{itemize}
 
+\subsubsection{The schema}
+
 %In this subsection we describe the major fields necessary to support the
 %architectural requirements that pertain to the annotations themselves
 %(as opposed to the remote discovery infrastructure). The prototype
@@ -60,7 +62,6 @@ CREATE TABLE 'annotations' (
        -- was the event manually induced?
        manual         boolean,
        -- subject type and annotation context:
-       LDcatgroup     text, REFERENCES 'LDgroups'
        LDcategory     text,
        LDtag          text,
        balerpatternid integer,
@@ -107,14 +108,119 @@ number of true failure events and for assessing the effectiveness
 and availability of system resilience mechanisms
 
 
-Note that event may have many relationships. We choose to limit them to one each to address
-the requirement of searchability. It is expected that exploration will facilitate dsicovery
-of events, even when the first order assocation may be off; also discovery of assocationed
-events in different subsytems can help understanding of how events propagate in a system.
+% not sure ofthe context here... (other tables?):
+%Note that event may have many relationships. We choose to limit them to one each to address
+%the requirement of searchability. It is expected that exploration will facilitate dsicovery
+%of events, even when the first order assocation may be off; also discovery of assocationed
+%events in different subsytems can help understanding of how events propagate in a system.
 
-Annotations may also refer to other annotations; this is called a \texttt{metaannotation}.
-An example might be where an annotation refers to a particular facilities
-test and a meta annotations refers to the entire set of tests.
+
+\subsubsection{Other tables}
+
+The schema includes some supporting tables:
+
+\begin{description}
+\item[Meta Annotations] \hfill
+
+      The \texttt{metaannotations} table supports annotation sets,
+      wherein a collection of annotations relates to a single larger
+      event
+      
+\item[Component Aliases] \hfill
+
+      Different components are identified differently in different log 
+      series, for example the same node on a Cray XC might be called
+      \texttt{nid00001} by the scheduling system, \texttt{c0-0c0s0n1}
+      by the boot system and even its IP address by another log source.
+      
+      To support this we define an \texttt{aliases} table, mapping 
+      equivalent component names. This is generally populated via
+      \texttt{/etc/hosts}, or on Cray systems, the output from
+      \texttt{rtr --system-map}
+      
+\item[Architectures] \hfill
+
+      The topologies of current clusters are more complex than
+      a simple hierarchy, so we support the definition of multiple
+      architectures to describe relationships between components.
+      We have defined three architectures for Cray systems, these
+      are described below. 
+      %in Section~\ref{s:hierarchies}.
+      
+\end{description}
+
+\subsubsection{Component hierarchies}
+\label{s:hierarchies}
+
+We have identified three distinct architectures within a Cray cluster:
+
+\begin{enumerate}
+\item The \texttt{physical} architecture consists of parent-child or
+container-contained associations, such as a \texttt{cabinet - chassis}, 
+\texttt{blade - router}, \texttt{router - link} and \texttt{router - nic}.
+This table is populated from the system definition - for example on a 
+Cray XC each cabinet holds three chassis, so an entry might look like:
+
+\begin{small}
+\begin{verbatim}
+id  type  cname  parent  children
+1   CAB   c0-0   smw     c0-0c0,c0-0c1,c0-0c2
+\end{verbatim}
+\end{small}
+
+The \texttt{physical} architecture supports discovery of faults 
+propagating from child to parent components.
+
+\item The \texttt{router} architecture describes network topology
+from the perspective of the router - for example an Aries has 
+(blue:black:green) links while a Gemini has X:Y:Z. This supports
+discovery of event propagation across neighboring routers:
+
+\begin{small}
+\begin{verbatim}
+id  type  cname        NICS [...]   nettopo
+10  RTR   c0-0c0s10a0  c0-0cd0...   0:0:10
+11  RTR   c0-0c0s11a0  c0-0c0s...   0:0:11
+12  RTR   c0-0c1s0a0   c0-0c1s...   0:1:0
+13  RTR   c0-0c1s1a0   c0-0c1s...   0:1:1
+\end{verbatim}
+\end{small}
+
+
+\item The \texttt{link} architecture supports 
+discovery of faults propagating across connected components,
+such as a node failure disabling a link and contributing to 
+congestion conditions on its peer node.
+
+\begin{small}
+\begin{verbatim}
+id  type E0            E1            
+16  GRE  c0-0c0s0a0l20 c0-0c0s4a0l22 
+\end{verbatim}
+\end{small}
+
+
+supports determination if an event affects the
+components at teh other end of a network link. The router architecutre
+supports determination of proximity of events in the network topology.
+We chose to separate architecutres in order to enable different
+search and interpreation of events which affect components with
+different \texttt{association} with each other. 
+\texttt{associations}
+include \texttt{parent-child: component-component} as opposed to
+\texttt{parent-child: router tile}, or \texttt{peer: HSN link}
+as opposed to \texttt{peer: Router-NIC} or \texttt{peer: NIC-Proc}.
+To represent more globally associated, such as SMW
+events which can directly affect all components, we define
+a \texttt{supremum} relationship.
+
+\end{enumerate}
+
+
+To support discovery of events propagating over connected or related 
+components our schema includes Architecture tables
+
+At the resolution of log entries 
 
 \texttt{Components} can include the compute and any supporting subsystems,
 such as storage and facilities related elements. For the Cray system
@@ -126,38 +232,11 @@ In order to enable dsicovery of events which are either reported on related
 compoentns or that propagate amont components we support the defintion
 of \texttt{architectures}. For the Cray system itself, we define three.
 
-The \texttt{physical} architecture consists of parent-child or
-container-contained assocations, such as a cabinet is the parent of
-3 chassis. For the network components, the router is a child of the blade.
-he router is a parent of the links and nics. The physical architecture
-can be populated from system defintation (e.g., XE or XC with the
-correct number of cabinets for a system).
 
-In order to support the fact that components may be identified by differnet
-names in different log messages, an \texttt{alias} table defines those conventions.
-This is largely cname, nid, and IP addresses determined from \texttt{/etc/hosts}
-or the output for \texttt{rtr --system-map}.
 
-The \texttt{router} architecture includes the network topology information
-for the router (e.g., blue:black:green)
-for Aries and X:Y:Z for gemini). The router information can be populated from
-the system-map output or the otuput of \texttt{rtr --interconnect}.
-The \texttt{link} architecture represents the network link connectivity,
-consisting of type (e.g., Blue, X+) and the tile endpoints obtained
-from the interconnect output.
 
-The \texttt{link} architecuture supports determination if an event affects the
-components at teh other end of a network link. The router architecutre
-supports determination of proximity of events in the network topology.
-We chose to separate architecutres in order to enable different
-search and interpreation of events which affect components with
-different \texttt{association} with each other. \texttt{associations}
-include \texttt{parent-child: component-component} as opposed to
-\texttt{parent-child: router tile}, or \texttt{peer: HSN link}
-as opposed to \texttt{peer: Router-NIC} or \texttt{peer: NIC-Proc}.
-To represent more globally associated, such as SMW
-events which can directly affect all components, we define
-a \texttt{supremum} relationship.
+
+
 
 In the prototype, we define all architectures and relationships,
 however we currently prinipally search the physical topology only
