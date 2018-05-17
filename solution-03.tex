@@ -1,84 +1,135 @@
 \subsection{Tools}
-\begin{itemize}
-\item get.py for querying an annotation database
-\item what do we have for building an annotation database? (Ann's tool for ingesting the mutrino and jobs info?)
-\item framework for working with rdf graph
 
-(plan is to have cataloging and running general queries supported at least, and ideally also slicing-and-fetching of timestamped logs in line-per-timestamp format)
-\end{itemize}
+There is no technical issue preventing someone from cataloging, 
+annotating and investigating a dataset 
+by manually writing RDF files, populating an annotation database 
+and running SQL and SPARQL queries against them. However, 
+the schema and vocabulary are accessible to a much wider 
+audience with the aid of tools that ease the learning curve and automate many of the processes.
 
-from intro:
+In the course of this work we have developed a small collection 
+of tools for constructing and querying graphs and annotation databases.
 
-
-      Many interactions with annotated, discoverable log data can be
-      can be described in just a few use cases:
-
-\begin{itemize}
-\item Cataloging a collection to make it discoverable
-\item Annotating specific logs, either to add expert commentary to
-      entries of interest or to associate human observations with log
-      entries, log subjects or time periods
-\item Finding data relevant to a subject and time period of interest
-\item Extracting slices of logs associated with specific annotations,
-      or periods and subjects of interest
-\end{itemize}
-
-     The diversity of data sources and formats mean that these use cases
-     can be extended almost indefinitely, and providing a generalized
-     interface to every conceivable HPC component and data format is
-     not the goal here (see philosophy point \textcolor{red}{X}). We
-     do, however, provide an extensible tooling infrastructure and tools
-     for some basic and common scenarios.
-
-
-
-- talk about why, eg rdf because it is machine readable, supports adding tools etc over time 
+%\begin{itemize}
+%\item get.py for querying an annotation database
+%\item what do we have for building an annotation database? (Ann's tool for %ingesting the mutrino and jobs info?)
+%\item framework for working with rdf graph
+%
+%(plan is to have cataloging and running general queries supported at least, and ideally also slicing-and-fetching of timestamped logs in line-per-timestamp format)
+%\end{itemize}
 
 \subsubsection{Cataloging log sources and archives}
 
-There is no technical issue preventing someone from cataloging a dataset 
-by manually writing and publishing RDF files, the process is laborious 
-and error prone: a good candidate for automation. Similarly, queries 
-can be run on the graph through any SPARQL endpoint, but the learning 
-curve is significant.
-
-To enable easy use of the RDF graph we have developed a framework, in 
+For easier use of the RDF graph we have developed a framework, in 
 the form of a python package \textcolor{red}{cite github address?}
 for constructing and querying the graph. The package is still pre-release
-and in active development, so far its capability is limited to 
-walking a directory tree to discover and catalog log files - with 
-some constraints on the types of log files it can inspect - and some 
-basic query abilities. The package is extensible: handlers for 
-file and log format types follow a small interface
+and in active development; so far, its capability is limited to 
+walking a directory tree to discover and catalog log files--with 
+some constraints on the types of log files it can inspect--and some 
+basic querying. The design is extensible: a small interface
+is defined for handlers of file and log format types and additional 
+handlers can be easily added to the toolkit.
 
 Much information must be collected to create useful metadata: most of
 this can be automatically inferred by querying the graph and inspecting 
 the file (for example, the filename hints at the likely \texttt{LogSeries},
 temporal boundaries can be discovered by reading the first and last records
-and the subjects for a tree of log data can be inferred from 
+and the subjects for a tree of log data can be inferred from a coarse-grained subject (such as the cluster) and information held by each \texttt{LogSeries}. Details requiring human input are acquired through 
+a simple question-and-answer interface that presents the user with 
+reasonable guesses and prompts editing and confirmation. In this manner 
+thousands of logs can be described based on only a handful of user 
+interactions.
 
 
+\subsubsection{Querying Annotations}
+\label{s:querying}
+The initial goal of our project was to enable annotation of log data so that researchers can analyze it with sufficienct context to understand what was happening on the system when a given set of loglines were written. We quickly realized that such a tool would also enable consultants and users to make sense of log data in order to better address questions about job failures. Neither use case would be addressed, however, without an efficient means of querying the annotations. We have therefore created a python-based query engine for that purpose.
 
+The query engine offers a set of command-line flags to customize a query. Users can combine them for highly specific queries without resorting to complex SQL. A user can refine a query by start (-s or --start) and/or end (-e or --end) time, by component name (e.g., node or slot cname, -c or --component), by type (descriptive phrase, such as "link down", -t or --type), or by any of the columns in the database schema (-t columnname=foo). In addition, a user can specify a job ID (-j or --job) to retrieve annotations on logs written during the time of the job and affecting any of the nodes on which it ran. Adding the -a or --after flag enables the user to specify a complex query with a single timestamp and retrieve the next single instance of a match for the query.
+
+In addition to specifying a single component, a user can retrieve annotations for related components, traversing the architecture of the system to a specified depth (-d or --depth), or number of hops. For example, a query for a component specified to depth 2 would retrieve parent and grandparent components as well as child and grandchild components. 
+\textcolor{red}{FIXME}
+A query with depth greater than zero also returns the supremum. 
+This flag leverages a table of physical components in the database that reflects the architecture of the system for which the annotations were made. 
+
+The user also has options for viewing the retrieved annotations. Formatting options include a table (-f table), a JSON array (-f json), or the default textual listing Figure~\ref{f:default_format}. The user may choose to increase verbosity (-v, -vv) or to limit the maximum number of retrieved annotations (--limit).
+
+An additional query for jobs (--jobs) allows the user to enter one or more annotation identifiers and retrieve the list of job IDs that could be affected by the annotation, based on the time and the nodes on which they ran.
+
+The current query engine retrieves annotations only, though the annotation metadata provides sufficient information to locate relevant log files. We plan to enable retrieval of subsets of the logs through the tool in the future.
+
+\begin{figure}
+\begin{small}
+\begin{minted}{sql}
+----------
+[386756] by acg on system None
+Time: 2015-03-02 13:28:10 to 2015-03-02 13:28:10
+Start state: None ; End state: None
+Description: SBUS RD error (?)
+Manually invoked? False ; System down?:  False
+Components: ["c0-0c2s2a0n1"]
+Tags:
+LogDiver category: NE
+Baler pattern ID: 267
+Relevant log files: hwerrlog
+----------
+[386757] by acg on system None
+Time: 2015-03-02 13:28:10 to 2015-03-02 13:28:10
+Start state: None ; End state: None
+Description: SBUS RD error (?)
+Manually invoked? False ; System down?:  False
+Components: ["c0-0c2s2a0n2"]
+Tags:
+LogDiver category: NE
+Baler pattern ID: 267
+Relevant log files: hwerrlog
+----------
+[386758] by acg on system None
+Time: 2015-03-02 13:28:18 to 2015-03-02 13:28:18
+Start state: None ; End state: None
+Description: SBUS RD error (?)
+Manually invoked? False ; System down?:  False
+Components: ["c0-0c2s3a0n0"]
+Tags:
+LogDiver category: NE
+Baler pattern ID: 267
+Relevant log files: hwerrlog
+----------
+
+\end{minted}
+\end{small}
+\caption{Annotations as returned by the query engine in default format. }
+\label{f:default_format}
+\end{figure}
 
 
 \subsubsection{Creating Annotations}
 \label{s:creating}
-To faciliate the creation of log line annotaitons
-and the identification of the occurences of events to be annotated,
+
+Annotations can be added to the database by several means. The simplest approach would be with an SQL insert at the sqlite command line, but this method can be tedious and relies on manual input. One simple way of adding a large batch of annotations is to enter them as a spreadsheet in CSV format, using a small uploader script which we provide. These approaches work well for human-generated annotations, such as individual observations from a system administrator or output from a ticketing system.
+
+To faciliate the automated creation of log line annotations
+and the identification of the occurrences of events to be annotated,
+we have been using two external tools, Baler and LogDiver (described in more detail below).
+In support of these we have developed tools to create annotation using output from these
+
+\section{Proof of Concept}
+To faciliate the creation of log line annotations
+and the identification of the occurrences of events to be annotated,
 we have been using two tools.
 
 LogDiver~\cite{LogDiver} is a tool developed by UIUC which includes a set of regular expressions defining
 events in log files of interest; the regular expressions are associated with categorizations
 which are a subset of those described in the previous section; the
-category name, \texttt{LDxxx}, was chosen to refelct our intention to map to the
-Log Diver categroizations where possible.
-LogDiver itself is used to discover the occurences of the regular
-expresssions in the logs and to determine statistics and infroamtin about event sequences
-such as statistics of failure events, or of timigns of failures and recoveries.
-LogDiver, or any such regex-based tool (e.g., SEC~\cite{SEC}) can be used to efficiently extract events
+category name, \texttt{LDxxx}, was chosen to reflect our intention to map to the
+LogDiver categorizations where possible.
+LogDiver itself is used to discover the occurrences of the regular
+expresssions in the logs and to determine statistics and information about event sequences
+such as statistics of failure events, or of timings of failures and recoveries.
+LogDiver, or any such regex-based tool (e.g., SEC~\cite{SEC}), can be used to efficiently extract events
 and annotate them, based on the intention of the extistence of the regex.
 
-For the dataset descirbed in this work, we prinicpally used Baler~\cite{Baler} for
+For the dataset described in this work, we prinicpally used Baler~\cite{Baler} for
 identifying the log lines to be annotated and for extracing them from the dataset.
 Baler extracts patterns from log files without requiring aprior knowledge of
 regex. Rather, Baler takes dictionaries of ''words''; words appearing in the log lines
@@ -141,14 +192,16 @@ knowledge of significant events. Annotation descriptions can provide additional 
 \end{figure*}
 
 
-We fed Baler with the Cray logs as they resided on the SMW This requires us
+We fed Baler with the Cray logs as they resided on the SMW. This requires us
 to do some file-specific format extraction of messages, timestamps,
 and components (e.g., \texttt{netwatch}, \texttt{hwerrlog}) which we may not have had to do if
-we fed it raw syslog versions of the files or datastream however, this also enables us
+we fed it raw syslog versions of the files or datastream; however, this also enables us
 to include the log file type (e.g., \texttt{nlrd}, \texttt{hwerrlog}) in the pattern metadata,
-whcih aids the log file look up. For many cases, messages are reported
+which aids the log file look-up. 
+
+For many cases, messages are reported
 on the SMW with the component association of the SMW. For some cases, we can
-extract the actual component of interest, for example, from the Baler pattern
+extract the actual component of interest. For example, from the Baler pattern
 \texttt{<host> nlrd <pid> found\_critical\_aries\_error: handling failed * link on <host> (node )}
 we can infer the fields from which to extract the \texttt{host} and \texttt{node} to which
 the annotation should be associated. Other messages refer to actions by the SMW for which
@@ -188,6 +241,9 @@ occurence of a log line matching a regex (e.g., notification
 of failed component), or Splunk, which is intended
 to facilitate knowledge of the occurences of pre-defined
 events with accompaning statistical plots.
+
+
+
 
 
 
