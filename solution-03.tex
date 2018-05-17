@@ -7,6 +7,34 @@
 (plan is to have cataloging and running general queries supported at least, and ideally also slicing-and-fetching of timestamped logs in line-per-timestamp format)
 \end{itemize}
 
+from intro:
+      While nothing prevents annotators and researchers from directly
+      annotating, describing and querying collections with SQL and RDF,
+      the learning curve for these technologies presents an entry
+      barrier to the time-constrained individuals who would otherwise
+      benefit from it.
+
+      Many interactions with annotated, discoverable log data can be
+      can be described in just a few use cases:
+
+\begin{itemize}
+\item Cataloging a collection to make it discoverable
+\item Annotating specific logs, either to add expert commentary to
+      entries of interest or to associate human observations with log
+      entries, log subjects or time periods
+\item Finding data relevant to a subject and time period of interest
+\item Extracting slices of logs associated with specific annotations,
+      or periods and subjects of interest
+\end{itemize}
+
+     The diversity of data sources and formats mean that these use cases
+     can be extended almost indefinitely, and providing a generalized
+     interface to every conceivable HPC component and data format is
+     not the goal here (see philosophy point \textcolor{red}{X}). We
+     do, however, provide an extensible tooling infrastructure and tools
+     for some basic and common scenarios.
+
+
 
 - talk about why, eg rdf because it is machine readable, supports adding tools etc over time 
 

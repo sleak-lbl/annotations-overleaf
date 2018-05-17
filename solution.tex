@@ -1,22 +1,26 @@
 \section{Our Approach}
 \label{s:solution}
 
-Our solution integrates three contributions to address these requirements:
+These requirements seem complex and even self-contradictory, but
+computer science has an aphorism: ``We can solve any problem by
+introducing an extra level of indirection''
+ \textcolor{red}{cite wikipedia Fundamental theorem of software engineering}
+
+In our solution, metadata provides that level of indirection by 
+decoupling publication of data from access to it. Our solution 
+integrates three contributions to address these requirements:
+
 \begin{enumerate}
 \item An RDF vocabulary for describing log and monitoring data collections
       in terms of the subject being monitored, the time period covered,
       the type and format of the data and details for accessing the data or
-      contacting its curator.
+      contacting its curator. The vocabulary allows construction of a 
+      distributed graph that can be queried to discover relevant collections
+      of log-like data and annotations on that data.
       
-      The defining characteristic of a \texttt{ConcreteLog} - that is, a 
-      specific file/stream/block-of-data being described - in the vocabulary
-      is that it has a \texttt{subject} - ie what the log reports on - and 
-      that its entries have associated \texttt{temporal} information. This is a 
-      sufficiently broad definition to cover all log-like collections
-      while providing dimensions for a search to operate in.
-      
-\item A schema for publishing annotations, linked to log data, in an SQL
-	  database. Annotations might be:
+\item A schema for publishing annotations for log data, in an SQL
+	  database, also in terms of subject and time period. Annotations 
+      databases fit neatly into the RDF graph and might contain:
       
 \begin{itemize}
 \item Expert commentary, such as ``this log message means that down links
@@ -28,38 +32,11 @@ Our solution integrates three contributions to address these requirements:
       Baler\textcolor{red}{cite}.
 \end{itemize}
 
-      The schema includes fields for the  components and the time period to 
-      which each annotation applies, allowing annotation sets to also be 
-      described with the RDF vocabulary
-
 \item A collection of tools to make the RDF vocabulary and annotation 
       schema accessible to users, system administrators and support staff.
-
-      While nothing prevents annotators and researchers from directly 
-      annotating, describing and querying collections with SQL and RDF, 
-      the learning curve for these technologies presents an entry 
-      barrier to the time-constrained individuals who would otherwise
-      benefit from it. 
-      
-      Many interactions with annotated, discoverable log data can be 
-      can be described in just a few use cases:
-      
-\begin{itemize}
-\item Cataloging a collection to make it discoverable
-\item Annotating specific logs, either to add expert commentary to 
-      entries of interest or to associate human observations with log 
-      entries, log subjects or time periods
-\item Finding data relevant to a subject and time period of interest
-\item Extracting slices of logs associated with specific annotations, 
-      or periods and subjects of interest
-\end{itemize}
-
-     The diversity of data sources and formats mean that these use cases 
-     can be extended almost indefinitely, and providing a generalized 
-     interface to every conceivable HPC component and data format is 
-     not the goal here (see philosophy point \textcolor{red}{X}). We 
-     do, however, provide an extensible tooling infrastructure and tools
-     for some basic and common scenarios.
+      The vocabulary and schema are independent of the tools, but 
+      the tools preovide an alternative to learning the underlying 
+      technologies and a starting point for further tool development.
 
 \end{enumerate}
 
