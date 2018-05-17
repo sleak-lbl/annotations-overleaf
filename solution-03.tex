@@ -48,8 +48,7 @@ The initial goal of our project was to enable annotation of log data so that res
 The query engine offers a set of command-line flags to customize a query. Users can combine them for highly specific queries without resorting to complex SQL. A user can refine a query by start (-s or --start) and/or end (-e or --end) time, by component name (e.g., node or slot cname, -c or --component), by type (descriptive phrase, such as "link down", -t or --type), or by any of the columns in the database schema (-t columnname=foo). In addition, a user can specify a job ID (-j or --job) to retrieve annotations on logs written during the time of the job and affecting any of the nodes on which it ran. Adding the -a or --after flag enables the user to specify a complex query with a single timestamp and retrieve the next single instance of a match for the query.
 
 In addition to specifying a single component, a user can retrieve annotations for related components, traversing the architecture of the system to a specified depth (-d or --depth), or number of hops. For example, a query for a component specified to depth 2 would retrieve parent and grandparent components as well as child and grandchild components. 
-\textcolor{red}{FIXME}
-A query with depth greater than zero also returns the supremum. 
+For any depth search, any supremum (eg SMW) or `unknown' components are also queried.
 This flag leverages a table of physical components in the database that reflects the architecture of the system for which the annotations were made. 
 
 The user also has options for viewing the retrieved annotations. Formatting options include a table (-f table), a JSON array (-f json), or the default textual listing Figure~\ref{f:default_format}. The user may choose to increase verbosity (-v, -vv) or to limit the maximum number of retrieved annotations (--limit).

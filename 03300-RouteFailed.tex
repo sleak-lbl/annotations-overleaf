@@ -7,6 +7,7 @@ are cases where the reroute failed. Query output is shown in Figure~\ref{f:route
 
 \begin{figure*}
 \begin{annol}
+# query for annotations where any text field contains the word 'route'
 python get.py -t route -f table annotations
 
 id	authorid	starttime	endtime	state	description	manual	logfiles LDcategory	components	balerpatternid
@@ -17,7 +18,7 @@ id	authorid	starttime	endtime	state	description	manual	logfiles LDcategory	compo
 <@\textbf{\textcolor{red}{756223	acg	2015-05-08 08:17:46	2015-05-08 08:17:46	Error during computation of network route    nlrd	NE	["unknown"]	749}}@>
 <@\textbf{\textcolor{red}{756224	acg	2015-05-08 08:31:24	2015-05-08 08:31:24	Error during computation of network route    nlrd	NE	["unknown"]	749}}@>
 \end{annol}
-\caption{Output of query for route annotations. Complete output = 15 annotations}
+\caption{Output of query for route annotations. Complete output = 15 annotations. Occurrences of network reroutes and failures in the rerouting process are of interest.}
 \label{f:routeq}
 \end{figure*}
 %752254	acg	2015-05-08 07:35:42	2015-05-08 07:35:42	Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
@@ -25,20 +26,22 @@ id	authorid	starttime	endtime	state	description	manual	logfiles LDcategory	compo
 Note that the annotation in red \texttt{Setting alerts due to failures. A network reroute is required} makes clear that there has been a failure and what the next step in the response will be. It appears that 3 failures occurred that require network reroutes to recover and two of the computations of those routes failed.
 
 To understand why the route computation failed, we query for annotations during a time frame proceeding the event, limiting the options to network (NE) annotations only.
-Query output is shown in Figure~\ref{f:routNEq}. It is clear from the annotations, that the component triggering the problem was \texttt{c0-0c0s9a0} and that
-while the recovey operation for a failed link was successful (green), that the
+Query output is shown in Figure~\ref{f:routNEq}. There are only 24 total annotations as opposed to the raw log lines which total over 238,000.
+It is clear from the annotations, that the component triggering the problem was \texttt{c0-0c0s9a0} and that
+while the recovery operation for a failed link was successful (green), that the
 failure of the reroute was due a problem in adding the blade back to the HSN (to include it in the routing) (orange).
 
 
 \begin{figure*}
 \begin{annol}
+# query for any annotations within the time range where the LDcategory is 'NE' (network)
 python get.py -s ''2015-05-08 08:00:00'' -e ''2015-05-08 08:35:00'' -t LDcat=NE -f table annotations
 
 id	authorid	starttime	endtime	description	manual	logfiles	LDcategory	components	balerpatternid
 866450	acg	2015-05-08 08:11:42	2015-05-08 08:11:42	xtcli set_alert	1	commands	NE	["c0-0c0s9a0"]
 752256	acg	2015-05-08 08:11:47	2015-05-08 08:11:47	Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
 756234	acg	2015-05-08 08:11:49	2015-05-08 08:11:49	Quiescing the network. This should result in decreased network injection.	nlrd	NE	["unknown"]	509
-756244	acg	2015-05-08 08:11:50	2015-05-08 08:11:50	Finished quiescing the network. (Is this just the steps in quiesce?).		nlrd	NE	["unknown"]	512
+756244	acg	2015-05-08 08:11:50	2015-05-08 08:11:50	Finished quiescing the network. 		nlrd	NE	["unknown"]	512
 756254	acg	2015-05-08 08:12:04	2015-05-08 08:12:04	Unquiescing the network. This will allow normal traffic injection to resume.	nlrd	NE	["unknown"]	554
 756148	acg	2015-05-08 08:12:05	2015-05-08 08:12:05	Telling all blades to unthrottle network bandwidth. This should enable increased network injection.	nlrd	NE	["unknown"]	423
 756264	acg	2015-05-08 08:12:05	2015-05-08 08:12:05	Finished unquiescing the network. This will allow normal traffic injection to resume.	nlrd	NE	["unknown"]	557
@@ -54,13 +57,14 @@ id	authorid	starttime	endtime	description	manual	logfiles	LDcategory	components	
 <@\textbf{\textcolor{red}{756224	acg	2015-05-08 08:31:24	2015-05-08 08:31:24	Error during computation of network route	nlrd	NE	["unknown"]	749}}@>
 865971	acg	2015-05-08 08:31:24	2015-05-08 08:31:24	xtcli set_alert	1	commands	NE	["c0-0c0s9a0"]
 \end{annol}
-\caption{Output of query for network related annotations to investigate the cause of the failed routes. Complete output = 24 annotations}
+\caption{Output of query for network related annotations to investigate the cause of the failed routes. Complete output = 24 annotations.
+A search of the raw log lines would be much more labor intensive -- 238,000 raw log lines occurred during this period.}
 \label{f:routNEq}
 \end{figure*}
 
 This, thus drives us to investigate problems with \texttt{c0-0c0s9}. Query output is shown in figure~\ref{f:c0-0c0s9q}. The full output has 90 annotation, but there
-are only a few distinct ones (shown). Messages pertaining to the node (e.g, Error getting power status)(cyan) occur for all nodes on the blade and repeats (multiple nodes and repeats
-surpressed). There is an out-of-memory killer annotation (red) that occurs repeatedly (repeats suppressed in the figure). Of particular interest, is that the
+are only a few distinct ones (shown).  Messages pertaining to the node (e.g, Error getting power status)(cyan) occur for all nodes on the blade and repeats (multiple nodes and repeats
+suppressed). There is an out-of-memory killer annotation (red) that occurs repeatedly (repeats suppressed in the figure). Of particular interest, is that the
 out of memory problem is reported by the blade controller (file is controllermessages and component is the blade), as opposed to a user process being killed by
 the OOM killer on a node.
 
@@ -68,6 +72,7 @@ the OOM killer on a node.
 
 \begin{figure*}
 \begin{annol}
+# query for annotations within the time range and for the specified component
 python get.py -s "2015-05-08 08:00:00" -e "2015-05-08 08:35:00" -c c0-0c0s9 -f table annotations
 
 id	authorid	starttime	endtime	description	logfiles	LDcategory	components	balerpatternid
@@ -91,7 +96,7 @@ id	authorid	starttime	endtime	description	logfiles	LDcategory	components	balerpa
 866451	acg	2015-05-08 08:30:21	2015-05-08 08:30:21	xtcli clr_warn	commands	NO	["c0-0c0s9"]
 \end{annol}
 \caption{Output of query for annotations to investigate the cause of the component failure. Complete output = 90 annotations, about 10 of which are distinct. For example, the
-node-related annotations occur for each node on the blade and many repeat in time and are surpressed in the figure. An OOM killer event occurs which is reported by the blade
+node-related annotations occur for each node on the blade and many repeat in time and are suppressed in the figure. An OOM killer event occurs which is reported by the blade
 controller, not a node.}
 \label{f:c0-0c0s9q}
 \end{figure*}
@@ -108,6 +113,7 @@ attributed to a generic \texttt{adm} for the annotation, as opposed to the human
 
 \begin{figure*}
 \begin{annol}
+# query for annotations between the time frame of interest for the named component and any components within a depth of 1
 python get.py -s "2015-05-08 08:35:00" -e "2015-05-08 23:35:00" -c c0-0c0s9 -d 1 -f table annotations
 
 id	authorid	starttime	endtime		endstate	description	manual	logfiles	LDcategory	components	balerpatternid
@@ -137,13 +143,10 @@ id	authorid	starttime	endtime		endstate	description	manual	logfiles	LDcategory	c
 864945	acg	2015-05-08 12:43:54	2015-05-08 12:50:15	0	xtcli disable	1	commands	NO	["unknown"]
 <@\textbf{\textcolor{green}{866412	acg	2015-05-08 12:50:18	2015-05-08 12:50:18	0	xtcli clr\_alert	1	commands	NE	["c0-0c0s9a0"]}}@>
 \end{annol}
-\caption{Output of query for annotations to investigate the resolution of the component failure. Attempts to address the blade itself were unsuccesful,
+\caption{Output of query for annotations to investigate the resolution of the component failure. Attempts to address the blade itself were unsuccessful,
 and several reboots were required before the alert cleared.}
 \label{f:routeresolution}
 \end{figure*}
 
 \RED{Are the endstate codes rationale for this case?}
 
-
-
-\RED{get some numbers as to the number of raw log lines that would have to be searched through vs the number of annotations}

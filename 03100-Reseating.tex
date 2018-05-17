@@ -4,12 +4,13 @@
 
 In order to investigate network conditions, we chose to search for annotations involving the
 word ''congest''. Query results are given in Figure~\ref{f:congest}. This looks like the
-expected output of response to a congestion conditions, though it was suprising
+expected output of response to a congestion conditions, though it was surprising
 on a system of this size, with candidate nodes and applications
 as computed by the system.
 
 \begin{figure*}
 \begin{annol}
+# query for annotations where any of the text fields (e.g., description, LDcategory) contain the word 'congest'
 python get.py  -t congest -f table annotations
 
 id	authorid	starttime	endtime		description	logfiles	LDcategory	components	balerpatternid
@@ -26,8 +27,9 @@ were listed.}
 \end{figure*}
 
 The annotation served as a guide to looking at the \texttt{nlrd} log to determine possible
-applications of interest. \RED{This type of investigation would be enabled by the
-full remote logset machinery}. There were, however, \emph{no} applications listed.
+applications of interest.This type of investigation would be enabled by the
+full remote logset machinery.\RED{Steve -- you will need to put the correct reference here}.
+There were, however, \emph{no} applications listed.
 As a result, we then queried for all annotations around this time window to find indication
 of a non-application congestion cause.
 
@@ -36,8 +38,8 @@ The reduction in log lines to annotation instances makes investigation of time r
 of similar event instances. Other than the ones in Figure~\ref{f:congest}, the rest dealt with problems with a single component \texttt{c0-0c1s8a0n0} and system
 response to congestion.
 \begin{itemize}
-\item  192 occurences for component \texttt{c0-0c1s8a0n0} of \scriptsize\texttt{Correctable memory error.  This may result in degraded performance.}\normalsize
-\item  47 occurences for component \texttt{c0-0c1s8a0n0} of \scriptsize\texttt{Component failed.}\normalsize
+\item  192 occurrences for component \texttt{c0-0c1s8a0n0} of \scriptsize\texttt{Correctable memory error.  This may result in degraded performance.}\normalsize
+\item  47 occurrences for component \texttt{c0-0c1s8a0n0} of \scriptsize\texttt{Component failed.}\normalsize
 \item \scriptsize\texttt{Telling all blades to throttle network bandwidth. This should result in decreased network injection.}\normalsize
 \item \scriptsize\texttt{Telling all blades to unthrottle network bandwidth. This should enable increased network injection.}\normalsize
 \item \scriptsize\texttt{Unthrottling the service blades only}\normalsize
@@ -60,7 +62,8 @@ includes two levels of parents (\texttt{c0-0c1s8a0} and \texttt{c0-0c1s8}) child
 The depth was chosen with the expectation that resolution would occur due to actions at the Aries or blade level.
 
 While roughly 500 annotations occurred in response to the query,
-only about 30 distinct annotations occurred. The annotations make it easy to understand the sequence of events. Extracted annotations are in Figure~\ref{f:congestresolve}.
+only about 30 distinct annotations occurred. This is in contrast to the raw log files in which over 153,000 log lines occurred.
+The annotations make it easy to understand the sequence of events. Extracted annotations are in Figure~\ref{f:congestresolve}.
 First an annotation of a system administrator, 'abc', action, generically assigned to the day (green) confirms that the blade is being reseated in response
 to errors. Warmswaps of the blade occur (cyan), however, while the warmswaps report as successful, timeouts waiting for items in the Outstanding Request Buffer (ORB)
 result in the ORB being 'scrubbed', delaying the recovery (red). The annotations help with the understanding of the ORB scrub related events.
@@ -69,6 +72,7 @@ Eventually the blade is added back (green) successfully and the blade is then bo
 \begin{figure*}
 \begin{annol}
 
+# query for annotations between the time frame of interest for the named component and any components within a depth of 2
 python get.py  -c c0-0c1s8a0n0 -d 2 -s "2015-04-30 07:00:00" -e "2015-04-30 10:00:00" -f table annotations
 
 id	authorid	starttime	endtime		endstate    description	logfiles	LDcategory	components	balerpatternid
@@ -82,7 +86,7 @@ id	authorid	starttime	endtime		endstate    description	logfiles	LDcategory	compo
 866491	acg	2015-04-30 07:16:56	2015-04-30 07:16:56	0	xtcli set_alert		commands	NE	["c0-0c1s8a0"]
 752251	acg	2015-04-30 07:17:03	2015-04-30 07:17:03		Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
 756229	acg	2015-04-30 07:17:10	2015-04-30 07:17:10		Quiescing the network. This should result in decreased network injection.	nlrd	NE	["unknown"]	509
-756239	acg	2015-04-30 07:17:10	2015-04-30 07:17:10		Finished quiescing the network. (Is this just the steps in quiesce?).	nlrd	NE	["unknown"]	512
+756239	acg	2015-04-30 07:17:10	2015-04-30 07:17:10		Finished quiescing the network. 	nlrd	NE	["unknown"]	512
 865961	acg	2015-04-30 07:17:16	2015-04-30 07:17:23	0	xtcli set_alert		commands	NO	["unknown"]
 756132	acg	2015-04-30 07:17:25	2015-04-30 07:17:25		Telling all blades to unthrottle network bandwidth. This should enable increased network injection.	nlrd	NE	["unknown"]	423
 756249	acg	2015-04-30 07:17:25	2015-04-30 07:17:25		Unquiescing the network. This will allow normal traffic injection to resume.	nlrd	NE	["unknown"]	554
@@ -115,7 +119,7 @@ id	authorid	starttime	endtime		endstate    description	logfiles	LDcategory	compo
 865012	acg	2015-04-30 07:56:46	2015-04-30 08:02:21	0	xtcli clr_warn	1	commands	NO	["c0-0c1s8"]
 752253	acg	2015-04-30 08:02:22	2015-04-30 08:02:22		Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
 756231	acg	2015-04-30 08:03:08	2015-04-30 08:03:08		Quiescing the network. This should result in decreased network injection.	nlrd	NE	["unknown"]	509
-756241	acg	2015-04-30 08:03:08	2015-04-30 08:03:08		Finished quiescing the network. (Is this just the steps in quiesce?).	nlrd	NE	["unknown"]	512
+756241	acg	2015-04-30 08:03:08	2015-04-30 08:03:08		Finished quiescing the network. 	nlrd	NE	["unknown"]	512
 756251	acg	2015-04-30 08:03:23	2015-04-30 08:03:23		Unquiescing the network. This will allow normal traffic injection to resume.	nlrd	NE	["unknown"]	554
 756261	acg	2015-04-30 08:03:23	2015-04-30 08:03:23		Finished unquiescing the network. This will allow normal traffic injection to resume.	nlrd	NE	["unknown"]	557
 756134	acg	2015-04-30 08:03:24	2015-04-30 08:03:24		Telling all blades to unthrottle network bandwidth. This should enable increased network injection.	nlrd	NE	["unknown"]	423
@@ -133,7 +137,7 @@ delayed resolution. The annotation of the system administrator (identified by 'a
 
 
 The annotations additionally make it easy to compare and investigate timescales of similar events. For instance,
-a recovery analysis might be based on the occurences and durtations of the warmswap sequences. This case
-might appear of longer duration that others, and the interveniening ORB scrubbing events that
+a recovery analysis might be based on the occurrences and durations of the warmswap sequences. This case
+might appear of longer duration that others, and the intervening ORB scrubbing events that
 needed to be handled for full recovery would be easily apparent.
 

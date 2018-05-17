@@ -16,7 +16,9 @@ the power budget is exceeded, but also when caps are applied, or perhaps fail to
 system enables such events to be exposed to the user.
 Many of these messages are identified by commands in the \texttt{commands} file or in the \texttt{controller} logs
 and therefore are not typically released to users.
-\RED{does the user get warned if setting the power cap fails to be applied?}
+Since our move to SLURM, there has been no automatic reporting of cap settings to the user.
+Currently, our users must manually \texttt{cat /sys/cray/pm\_counters/power\_cap}
+on each node to see current cap setting, or poll it to catch dynamic changes during runtime.
 
 Examples include commands annotated as:
 \begin{itemize}
@@ -30,11 +32,15 @@ error messages annotated as:
 \item \scriptsize\texttt{Node Error setting power budget. This may affect power capping.}\normalsize
 \end{itemize}
 
-A fundamental goal of the annotations is to enable user to understanding why performance and power limits did not perform as expected.
+A fundamental goal of the annotations to expose information to users that will enable
+understanding of why performance and power limits did not perform as expected.
 Basic capabilities enabled by our infrastructure include the ability to determine annotations occurring during a given job
 and jobs running while an annotation occurred. Examples of each are given in Figure~\ref{f:powerbudget}.
 In the top of the figure, all annotations during a job are queried -- it is seen that multiple times on multiple nodes, the
-power budget is exceeded, which may result in performance impact. In the bottom of the figure jobs running while an annotation occurs are queried. In this case,
+power budget is exceeded, which may result in performance impact. The cap is not a hard limit. The capping mechanism
+will keep the average power draw at or below the cap over a few second window at or below the cap; however
+instantaneous values may exceed the cap. Excursions over the cap are not made available to the user.
+In the bottom of the figure jobs running while an annotation occurs are queried. In this case,
 while the annotation was specific to node \texttt{c0-0c1s3n2}, the job itself was running on 96 nodes. Facilitating
 tracing the propagation of impact of an event is one of the design goals of this work.
 
@@ -54,7 +60,7 @@ id	authorid	starttime	endtime		description	logfiles	LDcategory	components	balerp
 # query for jobs running during annotation 864574
 python get.py --jobs 855158 -f table annotations
 JobId    UID    JobName    NumNodes    Start    End
-<@\textbf{\textcolor{red}{('163510', XXX, ``'xhpl''', 96, '2015-05-03 00:51:24', '2015-05-03 01:19:15')}}@>>
+<@\textbf{\textcolor{red}{('163510', XXX, ``'xhpl''', 96, '2015-05-03 00:51:24', '2015-05-03 01:19:15')}}@>
 
 \end{annol}
 \caption{Annotations provide access to power state information in otherwise unavailable logs. Basic implementation
