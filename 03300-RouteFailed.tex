@@ -3,7 +3,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%
 Another network investigation started with a search for annotations involving the word ''route''.
 We were expecting to see events about reroutes triggered as a result of component failure. More interesting
-are cases where the reroute failed. Query output is shown in Figure~\ref{f:routeq}.
+are cases where the reroutes failed. Query output is shown in Figure~\ref{f:routeq}.
 
 \begin{figure*}
 \begin{annol}
@@ -23,13 +23,13 @@ id	authorid	starttime	endtime	state	description	manual	logfiles LDcategory	compo
 \end{figure*}
 %752254	acg	2015-05-08 07:35:42	2015-05-08 07:35:42	Setting alerts due to failures. A network reroute is required	nlrd	NE	["unknown"]	498
 
-Note that the annotation in red \texttt{Setting alerts due to failures. A network reroute is required} makes clear that there has been a failure and what the next step in the response will be. It appears that 3 failures occurred that require network reroutes to recover and two of the computations of those routes failed.
+Each annotation \texttt{Setting alerts due to failures. A network reroute is required} makes clear that there has been a failure and what the next step in the response will be. It appears that 3 failures occurred that require network reroutes to recover and two of the computations of those route computations failed (red).
 
-To understand why the route computation failed, we query for annotations during a time frame proceeding the event, limiting the options to network (NE) annotations only.
+To understand why the route computation failed, we query for annotations during a time frame preceeding the event, limiting the options to network (NE) annotations only.
 Query output is shown in Figure~\ref{f:routNEq}. There are only 24 total annotations as opposed to the raw log lines which total over 238,000.
 It is clear from the annotations, that the component triggering the problem was \texttt{c0-0c0s9a0} and that
-while the recovery operation for a failed link was successful (green), that the
-failure of the reroute was due a problem in adding the blade back to the HSN (to include it in the routing) (orange).
+while the recovery operation for a failed link was successful (green), the
+failure of the reroute was due to  a problem in adding the blade back to the HSN (to include it in the routing) (orange).
 
 
 \begin{figure*}
@@ -62,13 +62,12 @@ A search of the raw log lines would be much more labor intensive -- 238,000 raw 
 \label{f:routNEq}
 \end{figure*}
 
-This, thus drives us to investigate problems with \texttt{c0-0c0s9}. Query output is shown in figure~\ref{f:c0-0c0s9q}. The full output has 90 annotation, but there
-are only a few distinct ones (shown).  Messages pertaining to the node (e.g, Error getting power status)(cyan) occur for all nodes on the blade and repeats (multiple nodes and repeats
-suppressed). There is an out-of-memory killer annotation (red) that occurs repeatedly (repeats suppressed in the figure). Of particular interest, is that the
+This drives us to investigate problems with \texttt{c0-0c0s9}. Query output is shown in Figure~\ref{f:c0-0c0s9q}. The full output has 90 annotations, but there
+are only a few distinct ones (shown). There is an out-of-memory killer annotation (red) that occurs repeatedly (repeats suppressed in the figure). Of particular interest is that the
 out of memory problem is reported by the blade controller (file is controllermessages and component is the blade), as opposed to a user process being killed by
 the OOM killer on a node.
 
-\RED{where do we go from here? look at the logs?}
+While resolution of the exact cause of the problem may necessitate involvement of a vendor, it is at least obvious from this that the blade controller operating system believes it is experiencing a low memory condition and taking active measures to prevent complete failure. This could be due to a variety of reasons such as a memory leak, a communication problem causing buffering of messages to fill memory, etc. Unfortunately the processes it kills may be needed for proper operation and the problem being fixed by a complete reboot seems to validate that the problem was a software/firmware state issue and not hardware failure.
 
 \begin{figure*}
 \begin{annol}
@@ -105,11 +104,12 @@ controller, not a node.}
 Finally, we are interested in determining if this problem got resolved and how. We utilize the depth search
 \texttt{-d 1} to query parents (\texttt{c0-0c0}), children (the nodes and Aries), and any unknown/supremum components.
 The depth and time range currently
-are chosen by trial and error, however from output in Figure~\ref{f:routeresolution} it is clear that the OOM messages continue until a unsuccessful attempt is made to power
-down the blade (orange), and a few attempts are necessary to rebooted the system (red) and clear the alert (green). This case also illustrates
-the endstate field (which is automatically populated with the end state of commands in the command file (described in Section~\ref{s:annotations}))
-as well as the manual attribution to any annotations of events from the \texttt{command} file and \texttt{p0-XXX} directories. The latter are
-attributed to a generic \texttt{adm} for the annotation, as opposed to the human annotation of the blade reseating in the previous example.
+are chosen by trial and error, however from output in Figure~\ref{f:routeresolution} it is clear that the OOM messages continue until an unsuccessful attempt is made to power
+down the blade (orange), and a few attempts are necessary to reboot the system (red) and clear the alert (green). 
+
+This case also illustrates
+the endstate field (which is automatically populated with the end state of commands in the command file (described in Section~\ref{s:proof})). Note that erroneous commands, for example \texttt{xtcli power} with incorrect argument or target specified at 11:05:57, result in error. Also illustrated are manual attribution of any annotations of events from the \texttt{command} file and \texttt{p0-XXX} directories. The latter are
+attributed to a generic system adminstrator authorid, \texttt{adm}, for the annotation, as opposed to the human annotation of the blade reseating in the previous example.
 
 \begin{figure*}
 \begin{annol}
@@ -148,5 +148,4 @@ and several reboots were required before the alert cleared.}
 \label{f:routeresolution}
 \end{figure*}
 
-\RED{Are the endstate codes rationale for this case?}
 

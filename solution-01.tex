@@ -1,10 +1,10 @@
 \subsection{RDF Vocabulary}
 
 A mechanism for decentralized description and discovery of data was proposed
-over two decades ago \textcolor{red}{cite https://www.w3.org/Talks/WWW94Tim/} 
-and exists now in the tools and technologies of the Semantic Web. The 
-specification of RDF as a data interchange format for the World Wide 
-Web. \textcolor{red}{cite https://www.w3.org/RDF/?} is particularly relevant 
+over two decades ago~\cite{SemanticWebOrig}
+and exists now in the form of Linked Data tools and technologies. The 
+specification of RDF~\cite{RDF} as a data interchange format for the World Wide 
+Web is particularly relevant 
 to our identified requirements. Decoupling publication 
 from access meets many of these requirements (1, 4 and 5) and 
 using RDF to describe log data collections provides decentralization 
@@ -23,7 +23,7 @@ nersc:nersc rdfs:type foaf:Organization .
 \end{minted}
 
 \caption{A triple of (subject, predicate, object) describes an edge 
-in an RDF graph. The \texttt{Turtle}\textcolor{red}{cite} syntax shown
+in an RDF graph. The \texttt{Turtle}~\cite{TurtleSpec} syntax shown
 here aids human readability by condensing URIs into a prefix and a suffix,
 so for example \texttt{rdfs:type} expands as
 \texttt{<http://www.w3.org/2000/01/rdf-schema\#type>}.}
@@ -33,14 +33,13 @@ so for example \texttt{rdfs:type} expands as
 For example, we wish to state that NERSC is an Organization. We have a 
 \emph{subject} (NERSC), a \emph{predicate} (``is an'') and an \emph{object} 
 (Organization). In a manner of pulling oneself up by one's bootstraps, the 
-W3C \textcolor{red}{cite https://www.w3.org/} publishes some standard 
+W3C~\cite{W3Cweb} publishes some standard 
 vocabularies in the form of URIs that have a well-defined and documented 
 meaning, including that \texttt{<http://www.w3.org/2000/01/rdf-schema\#type>}
 refers to the predicate ``is a''. Another vocabulary, known as the 
 Friend-of-a-friend vocabularies, associates \texttt{<http://xmlns.com/foaf/0.1/Organization>} with the concept of an 
 organization. In this spirit we write the triple in Figure~\ref{f:rdftriples}
-by associating a URI we've chosen: \texttt{<http://portal.nersc.gov/project/mpccc/sleak/nersc\#nersc>} with the 
-organization we know as ``NERSC''. 
+by associating a URI we've chosen: \path{<http://portal.nersc.gov/project/mpccc/sleak/nersc\#nersc>} with the organization we know as ``NERSC''. 
 
 A single triple tells us very little, but a collection of many triples 
 forms a graph representing almost arbitrary knowledge graph. We get 
@@ -48,7 +47,7 @@ decentralization by the use of URIs as graph elements - any contributer
 can publish a set of triples and, so long as \emph{somebody} is aware of 
 it, it can be incorporated into a global graph.
 
-The other Semantic Web element key to our requirements is the SPARQL 
+The other Linked Data element key to our requirements is the SPARQL 
 graph query language. A SPARQL query 
 arranges variables into a set of triples and returns nodes for which
 the triples form a true statement. For example, the following SPARQL query
@@ -90,9 +89,6 @@ variables, which in this case are the nodes show in purple.
 \label{f:sparql-diagram}
 \end{figure}
 
-\textcolor{red}{TODO: might need a ref to an "intro to semantic web" resource}
-
-
 \subsubsection{The vocabulary}
 
 \begin{figure*}
@@ -126,8 +122,8 @@ from different sites (indicated via color), forming a single global graph. }
 \end{figure*}
 
 The vocabulary is extended and specialized 
-from the Data Catalog Vocabulary \textcolor{red}{cite}. The meaning, 
-reason and usage of some key classes and properties:
+from the Data Catalog Vocabulary~\cite{DCAT}. The meaning, 
+reason and usage of some key classes and properties are:
 
 \begin{description}
 \item[Catalog] \hfill
@@ -196,17 +192,17 @@ the device on each end - so we support a weaker relationship
 In the same way that \texttt{ConcreteLog}s can be classified into 
 \texttt{LogSeries}, \texttt{Subject}s can be classified into 
 \texttt{SubjectType}s. An example \texttt{SubjectType} is ``cluster'',
-compared to an example \texttt{Subject}, NERSC Cori. During the
+compared its corresponding \texttt{Subject} such as NERSC Cori. During the
 procedure of cataloging LogSets, the graph can be queried to see that
-a specific \texttt{LogSeries} is about a \texttt{SubjectType} 
+a specific \texttt{LogSeries} is about a \texttt{SubjectType}, eg 
 \texttt{hsn}, from which tools can infer that a specific 
-\texttt{ConcreteLog} should be associated with \texttt{cori\_hsn}.
+\texttt{ConcreteLog} should be associated with, eg \texttt{cori\_hsn}.
 (This inference capability is essential when cataloging thousands of 
 log files)
 
 \texttt{SubjectType} based on the \texttt{skos:Concept}, through 
 which \texttt{SubjectType}s can be classified as broader or narrower
-that each other (``network'' is a broader concept than ``AriesHSN'').
+than each other (``network'' is a broader concept than ``AriesHSN'').
 
 \end{description}
 

@@ -6,10 +6,10 @@
 %extract useful insights from the data we collect. In the next section we explore 
 %the requirements for a solution to address these constraints.)
 
-Much data is collected - or can be collected - but often by different
+Much data is - or can be - collected, but often by different
 people and for a specific purpose, and in formats chosen to suit the 
-data source or a specific use for the collection. 
-For example log data frequently originates 
+data source or a specific use.
+For example, log data frequently originates 
 as messages emitted by some software and is thus stored as
 text files with a timestamped line per entry, while job records
 are typically stored in database tables with well-defined fields.
@@ -17,7 +17,7 @@ Making data presentable and accessible beyond the specific needs of those
 collecting it is difficult and time-consuming and, consequently, 
 infrequently performed. 
 
-This implies that to support extration of useful insights from available data 
+This implies that to support extraction of useful insights from available data 
 we need to be agnostic towards the format and storage of the data
 \textbf{(requirement 1)}.
 
@@ -28,14 +28,14 @@ to redundant collections, so \textbf{requirement 2} is to support
 discovery with no a priori knowledge of other collection efforts.
 
 An effective solution within a site is 
-use of a tool like LogStash~\textcolor{red}{cite} 
+use of a tool like LogStash~\textcolor{red}{cite?} 
 to convert everything to a common format and collect it in a single 
 centralized location. This however has some limitations:
 
 \begin{itemize}
 \item It requires all collection activities to ensure their data can
       be converted and stored in the centralized format. Many ad-hoc
-      colelction activities cannot justify the effort required to 
+      collection activities cannot justify the effort required to 
       comply, so the centralized collection fails to capture the full
       suite of available data.
 \item The diversity of security domains poses a challenge: should data
@@ -50,9 +50,7 @@ centralized location. This however has some limitations:
 Therefore we would like our solution to be decentralized 
 \textbf{(requirement 3)}.
 
-Access to log datasets is an obvious requirement and the release 
-of some such datasets is a goal of the HMDR project\textcolor{red}{CITE}. 
-But it is well-known in the research 
+Access to log datasets is an obvious requirement, but it is well-known in the research 
 community that very few datasets are released for researchers
 due to the presence of sensitive data such as user login information, 
 the difficulty of log anonymization and the limited cost-benefit 
@@ -66,7 +64,7 @@ paradigm of ``select some non-sensitive data and release that''
 instead \textbf{(requirement 4)}.
 
 Expert commentary on the meaning of log messages has been identified as
-a desirable resource ~\cite{CUG2016BoF} but expertise is domain-specific
+a desirable~\cite{CUG2016BoF} resource but expertise is domain-specific
 and distributed across many individuals, all of whom have other, primary 
 responsibilities. The solution must therefore allow for
 domain experts to independently contribute advice in the format they
@@ -92,7 +90,7 @@ of discovering non-obviously-related data \textbf{(requirement 6)}.
 So in summary, our solution should:
 \begin{enumerate}
 \item Be agnostic towards the format and storage of data.
-\item Not require a priori knowledge of other similar efforts.
+\item Not require a priori knowledge of existing collections.
 \item Be decentralized.
 \item Allow publishing of data to be low effort and low risk.
 \item Allow domain experts to independently contribute advice 

@@ -24,8 +24,8 @@ For easier use of the RDF graph we have developed a framework, in
 the form of a python package \textcolor{red}{cite github address?}
 for constructing and querying the graph. The package is still pre-release
 and in active development; so far, its capability is limited to 
-walking a directory tree to discover and catalog log files--with 
-some constraints on the types of log files it can inspect--and some 
+walking a directory tree to discover and catalog log files --with 
+some constraints on the types of log files it can inspect-- and some 
 basic querying. The design is extensible: a small interface
 is defined for handlers of file and log format types and additional 
 handlers can be easily added to the toolkit.
@@ -43,7 +43,7 @@ interactions.
 
 \subsubsection{Querying Annotations}
 \label{s:querying}
-The initial goal of our project was to enable annotation of log data so that researchers can analyze it with sufficienct context to understand what was happening on the system when a given set of loglines were written. We quickly realized that such a tool would also enable consultants and users to make sense of log data in order to better address questions about job failures. Neither use case would be addressed, however, without an efficient means of querying the annotations. We have therefore created a python-based query engine for that purpose.
+A stated goal of our project is to enable annotation of log data so that researchers can analyze it with sufficienct context to understand what was happening on the system when a given set of loglines were written. However, such a tool would also enable consultants and users to make sense of log data in order to better address questions about job failures. Neither use case would be addressed, however, without an efficient means of querying the annotations. We have therefore created a python-based query engine for that purpose.
 
 The query engine offers a set of command-line flags to customize a query. Users can combine them for highly specific queries without resorting to complex SQL. A user can refine a query by start (-s or --start) and/or end (-e or --end) time, by component name (e.g., node or slot cname, -c or --component), by type (descriptive phrase, such as "link down", -t or --type), or by any of the columns in the database schema (-t columnname=foo). In addition, a user can specify a job ID (-j or --job) to retrieve annotations on logs written during the time of the job and affecting any of the nodes on which it ran. Adding the -a or --after flag enables the user to specify a complex query with a single timestamp and retrieve the next single instance of a match for the query.
 
@@ -61,39 +61,39 @@ The current query engine retrieves annotations only, though the annotation metad
 \begin{small}
 \begin{minted}{sql}
 ----------
-[386756] by acg on system None
-Time: 2015-03-02 13:28:10 to 2015-03-02 13:28:10
+[822659] by acg on system Mutrino
+Time: 2015-04-29 18:16:32 to 2015-04-29 18:16:32
 Start state: None ; End state: None
-Description: SBUS RD error (?)
+Description: Correctable memory error. This may result in degraded performance.
 Manually invoked? False ; System down?:  False
-Components: ["c0-0c2s2a0n1"]
+Components: ["c0-0c1s8a0n0"]
 Tags:
-LogDiver category: NE
-Baler pattern ID: 267
+LogDiver category group: NO
+Baler pattern ID: 280
 Relevant log files: hwerrlog
 ----------
-[386757] by acg on system None
-Time: 2015-03-02 13:28:10 to 2015-03-02 13:28:10
+[822660] by acg on system Mutrino
+Time: 2015-04-29 18:16:42 to 2015-04-29 18:16:42
 Start state: None ; End state: None
-Description: SBUS RD error (?)
+Description: Correctable memory error. This may result in degraded performance.
 Manually invoked? False ; System down?:  False
-Components: ["c0-0c2s2a0n2"]
+Components: ["c0-0c1s8a0n0"]
 Tags:
-LogDiver category: NE
-Baler pattern ID: 267
+LogDiver category group: NO
+Baler pattern ID: 280
 Relevant log files: hwerrlog
 ----------
-[386758] by acg on system None
-Time: 2015-03-02 13:28:18 to 2015-03-02 13:28:18
+[822661] by acg on system Mutrino
+Time: 2015-04-29 18:16:52 to 2015-04-29 18:16:52
 Start state: None ; End state: None
-Description: SBUS RD error (?)
+Description: Correctable memory error. This may result in degraded performance.
 Manually invoked? False ; System down?:  False
-Components: ["c0-0c2s3a0n0"]
+Components: ["c0-0c1s8a0n0"]
 Tags:
-LogDiver category: NE
-Baler pattern ID: 267
+LogDiver category group: NO
+Baler pattern ID: 280
 Relevant log files: hwerrlog
-----------
+*** Done! ***
 
 \end{minted}
 \end{small}
@@ -103,16 +103,19 @@ Relevant log files: hwerrlog
 
 
 \subsubsection{Creating Annotations}
-\label{s:creating}
 
-Annotations can be added to the database by several means. The simplest approach would be with an SQL insert at the sqlite command line, but this method can be tedious and relies on manual input. One simple way of adding a large batch of annotations is to enter them as a spreadsheet in CSV format, using a small uploader script which we provide. These approaches work well for human-generated annotations, such as individual observations from a system administrator or output from a ticketing system.
+
+Annotations can be added to a database by several means. The simplest approach would be with an SQL insert at an sqlite command line, but this method can be tedious and relies on manual input. One simple way of adding a large batch of annotations is to enter them as a spreadsheet in CSV format, using a small uploader script which we provide. These approaches work well for human-generated annotations, such as individual observations from a system administrator or output from a ticketing system.
 
 To faciliate the automated creation of log line annotations
 and the identification of the occurrences of events to be annotated,
 we have been using two external tools, Baler and LogDiver (described in more detail below).
-In support of these we have developed tools to create annotation using output from these
+In support of these we have developed tools to create annotation using output from these.
+
+Note that a single or even multiple SQL databases are not required by our design. A plugin interface to a component presenting an API which could return similar annotation information would also be appropriate (e.g., one could front a tool with its own datastore). However, to enable a simple, consistent format for portable general release of an annotated dataset we do so, as described in the next section.
 
 \section{Proof of Concept}
+\label{s:proof}
 To faciliate the creation of log line annotations
 and the identification of the occurrences of events to be annotated,
 we have been using two tools.
@@ -120,18 +123,18 @@ we have been using two tools.
 LogDiver~\cite{LogDiver} is a tool developed by UIUC which includes a set of regular expressions defining
 events in log files of interest; the regular expressions are associated with categorizations
 which are a subset of those described in the previous section; the
-category name, \texttt{LDxxx}, was chosen to reflect our intention to map to the
+category name, \texttt{LDcategory}, was chosen to reflect our intention to map to the
 LogDiver categorizations where possible.
 LogDiver itself is used to discover the occurrences of the regular
 expresssions in the logs and to determine statistics and information about event sequences
 such as statistics of failure events, or of timings of failures and recoveries.
 LogDiver, or any such regex-based tool (e.g., SEC~\cite{SEC}), can be used to efficiently extract events
-and annotate them, based on the intention of the extistence of the regex.
+for subsequent annotation, based on the intention for the existence of the regex.
 
 For the dataset described in this work, we prinicpally used Baler~\cite{Baler} for
 identifying the log lines to be annotated and for extracing them from the dataset.
-Baler extracts patterns from log files without requiring aprior knowledge of
-regex. Rather, Baler takes dictionaries of ''words''; words appearing in the log lines
+Baler extracts patterns from log files without requiring apriori knowledge of
+regex of interest. Rather, Baler takes dictionaries of ''words''; words appearing in the log lines
 are the passed through to the pattern and non-words become a wildcard in the pattern.
 Wildcards of certain formats, for example numbers, hex dumps, char arrays, hostnames and link names
 (in cname format for Cray systems) are represented as that formatted type in the pattern.
@@ -142,25 +145,25 @@ This illustrates where words, formatted wildcards, and unformatted wildcards (re
 For Cray systems, we augment
 the dictionary with an architecture specific dictionary of about 100 words (e.g., Lustre, DIMM).
 For 3 months of data from our Trinity test system, Mutrino, a 100 node XC 40,
-we had over 120 million text log lines which were reduced to 15500 patterns. To further identify patterns
+we had over 120 million text log lines which were reduced to 15,500 patterns. To further identify patterns
 of interest, we weight the patterns by the occurence of 50 weighted
 keywords (e.g., congestion = 1.5, error = 1.5, degrade = 0.75). This further reduced the patterns
-to 2500 significantly weighted patterns. For example the pattern
+to 2,500 significantly weighted patterns. For example the pattern
 \texttt{<host> nlrd <pid> ***ERROR***: Link recovery operation failed; error <num>} has
 an aggregate weight of 5.5. From those, we chose 150
-patterns to annotate with enhanced descirptions. This resulted in about 860,000
+patterns to annotate with enhanced descriptions. This resulted in about 860,000
 annotated log line instances.
 
 It is our intention to
 build a plugin to interface with Baler, and support the annotations there,
 however in the prototype, we merely annotated the extracted patterns from
-Baler and loaded them into the database.
-We do, however, include the Baler pattern id in the annotation fields
+Baler and loaded them into a single database.
+We include the Baler pattern id in the annotation fields
 for reference ease; only the annotation description, not the original log line nor the pattern
 are stored in the annotation database.
 
 Some example patterns, from which the originating log line will be obvious, and
-the resulting annotation used in this work, are given in Figure~\ref{f:baler}.
+the resulting annotations used in this work, are given in Figure~\ref{f:baler}.
 
 \begin{figure*}
 \begin{annol}
@@ -191,15 +194,15 @@ knowledge of significant events. Annotation descriptions can provide additional 
 \end{figure*}
 
 
-We fed Baler with the Cray logs as they resided on the SMW. This requires us
+We fed Baler with the Cray logs in the format in which they reside on the smw. This required us
 to do some file-specific format extraction of messages, timestamps,
 and components (e.g., \texttt{netwatch}, \texttt{hwerrlog}) which we may not have had to do if
-we fed it raw syslog versions of the files or datastream; however, this also enables us
+we had fed it raw syslog versions of the files or datastream; however, this also enabled us
 to include the log file type (e.g., \texttt{nlrd}, \texttt{hwerrlog}) in the pattern metadata,
 which aids the log file look-up. 
 
 For many cases, messages are reported
-on the SMW with the component association of the SMW. For some cases, we can
+on the smw with the component association of the smw. For some cases, we can
 extract the actual component of interest. For example, from the Baler pattern
 \texttt{<host> nlrd <pid> found\_critical\_aries\_error: handling failed * link on <host> (node )}
 we can infer the fields from which to extract the \texttt{host} and \texttt{node} to which
@@ -212,8 +215,8 @@ to associate \texttt{START} and \texttt{END} of events, for which we used a perl
 log includes both manually initiated and automatically invoked commands of
 interest such as warmswaps, boots, etc. This was particularly useful for
 determining manual actions that may not have been well documented by the
-system administrators. This resulted in another 2000 annotations. In addition,
-we extracted the times of reboots from the datatime in the name of the \texttt{p0-XXX}
+system administrators. This resulted in another 2,000 annotations. In addition,
+we extracted the times of reboots from the datetime in the name of the \texttt{p0-XXX}
 directories. All annotations from these two sources are attributed as manually induced.
 
 Some other system administrator actions were recorded by manually generated annotations

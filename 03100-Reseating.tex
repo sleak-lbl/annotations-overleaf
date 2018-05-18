@@ -12,13 +12,12 @@ as computed by the system.
 \begin{annol}
 # query for annotations where any of the text fields (e.g., description, LDcategory) contain the word 'congest'
 python get.py  -t congest -f table annotations
-
-id	authorid	starttime	endtime		description	logfiles	LDcategory	components	balerpatternid
-756163	acg	2015-04-28 10:15:44	2015-04-28 10:15:44	System computing and listing congestion candidate applications		nlrd	NE	["unknown"]	704
-756168	acg	2015-04-28 10:15:44	2015-04-28 10:15:44	System computing and listing congestion candidate nodes		nlrd	NE	["unknown"]	705
+id      authorid   starttime              endtime                description                                                      logfiles    LDcategory    components    balerpatternid
+756163    acg      2015-04-28 10:15:44    2015-04-28 10:15:44    System computing and listing congestion candidate applications   nlrd    NE    ["unknown"]    704
+756168    acg      2015-04-28 10:15:44    2015-04-28 10:15:44    System computing and listing congestion candidate nodes          nlrd    NE    ["unknown"]    705
 ...
-756167	acg	2015-04-28 10:32:06	2015-04-28 10:32:06	System computing and listing congestion candidate applications		nlrd	NE	["unknown"]	704
-756172	acg	2015-04-28 10:32:06	2015-04-28 10:32:06	System computing and listing congestion candidate nodes		nlrd	NE	["unknown"]	705
+756167    acg      2015-04-28 10:32:06    2015-04-28 10:32:06    System computing and listing congestion candidate applications   nlrd    NE    ["unknown"]    704
+756172    acg      2015-04-28 10:32:06    2015-04-28 10:32:06    System computing and listing congestion candidate nodes          nlrd    NE    ["unknown"]    705
 \end{annol}
 \caption{Congestion response annotations occur 5 times within 15 minutes. The annotation regarding
 candidate applications drove investigation of the \texttt{nlrd} log file, but no applications
@@ -26,9 +25,11 @@ were listed.}
 \label{f:congest}
 \end{figure*}
 
-The annotation served as a guide to looking at the \texttt{nlrd} log to determine possible
-applications of interest.This type of investigation would be enabled by the
-full remote logset machinery.\RED{Steve -- you will need to put the correct reference here}.
+These annotations guided us to the \texttt{nlrd} in search of applications of interest. 
+The link from annotation to relevant slice of the source logfile is a planned capability
+of the graph-query tool, however that functionality was not yet available so a visual 
+inspection of the relevant file was used.
+
 There were, however, \emph{no} applications listed.
 As a result, we then queried for all annotations around this time window to find indication
 of a non-application congestion cause.

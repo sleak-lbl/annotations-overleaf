@@ -40,7 +40,7 @@ in a much larger volume of log data.}
 %of that implemention, however that is not required. More generally
 %this would be descirbed in terms of accessor APIs independent of
 %the implementation beneath them.
-Our annotation schema is an SQL database definition with a central 
+Our annotation schema can be represented as an SQL database definition with a central 
 ``annotations'' table:
 
 \begin{figure}[H]
@@ -91,14 +91,17 @@ also \texttt{SubjectType}s described in RDF in data dictionaries and can, in
 combination with the \texttt{system}, identify a specific component.
 
 The \texttt{components} may be identified with finer granularity than
-is represented in the RDF graph - for example \texttt{c0-1c0s4n0}. One 
-envisioned source of machine-generated annotations is LogDiver~\cite{LogDiver}, 
+is represented in the RDF graph - for example \texttt{c0-1c0s4n0}. The 
+\texttt{LDcategory} includes \texttt{node/blade},
+\texttt{scheduler}, \texttt{storage}, \texttt{network}, 
+\texttt{cooling/facilities/sensors},
+\texttt{power}, \texttt{system software}, \texttt{datawarp}, 
+and \texttt{unknown}, which also correspond (except for \texttt{unknown}) to
+ \texttt{SubjectType}s in an RDF dictionary. The name of this field and its 
+ categories are inspired by LogDiver~\cite{LogDiver}, 
 a tool developed by UIUC which associates regular expressions defining
-events in log files of interest with categorizations including 
-\texttt{node/blade},
-\texttt{scheduler}, \texttt{storage}, \texttt{network}, \texttt{cooling/facilities/sensors},
-\texttt{power}, \texttt{system software}, \texttt{datawarp}, and \texttt{unknown}.
-These also correspond to \texttt{SubjectType}s in an RDF dictionary.
+events in log files of interest with categorizations including these. 
+We envisage LogDiver as an option used to identify log entries for annotation.
 
 The \texttt{manual} flag indicates that an event was manually induced,
 such as an administrator action to take down a node as opposed
@@ -146,13 +149,21 @@ The schema includes some supporting tables:
       We have defined three architectures for Cray systems, these
       are described below. 
       %in Section~\ref{s:hierarchies}.
+      We chose to separate architectures in order to enable different
+search and interpretation of events which affect components with
+different \texttt{association} with each other. 
+\texttt{associations}
+include \texttt{parent-child: component-component} as opposed to
+\texttt{parent-child: router-tile}, or \texttt{peer: HSN link}
+as opposed to \texttt{peer: Router-NIC} or \texttt{peer: NIC-Proc}.
+
       
 \end{description}
 
 \subsubsection{Component hierarchies}
 \label{s:hierarchies}
 
-We have identified three distinct architectures within a Cray cluster:
+We have identified three distinct architectures within a Cray cluster
 
 \begin{enumerate}
 \item The \texttt{physical} architecture consists of parent-child or
@@ -169,12 +180,12 @@ id  type  cname  parent  children
 \end{small}
 
 The \texttt{physical} architecture supports discovery of faults 
-propagating from child to parent components.
+propagating from child to parent components and vice versa.
 
 \item The \texttt{router} architecture describes network topology
-from the perspective of the router - for example an Aries has 
-(blue:black:green) links while a Gemini has X:Y:Z. This supports
-discovery of event propagation across neighboring routers:
+from the perspective of the router - for example an Aries may be specified by its 
+(blue:black:green) identifiers  while a Gemini by its X:Y:Z. This 
+supports determination of proximity of events in the network topology.
 
 \begin{small}
 \begin{verbatim}
@@ -185,7 +196,6 @@ id  type  cname        NICS [...]   nettopo
 13  RTR   c0-0c1s1a0   c0-0c1s...   0:1:1
 \end{verbatim}
 \end{small}
-
 
 \item The \texttt{link} architecture supports 
 discovery of faults propagating across connected components,
@@ -199,56 +209,25 @@ id  type E0            E1
 \end{verbatim}
 \end{small}
 
-
-supports determination if an event affects the
-components at teh other end of a network link. The router architecutre
-supports determination of proximity of events in the network topology.
-We chose to separate architecutres in order to enable different
-search and interpreation of events which affect components with
-different \texttt{association} with each other. 
-\texttt{associations}
-include \texttt{parent-child: component-component} as opposed to
-\texttt{parent-child: router tile}, or \texttt{peer: HSN link}
-as opposed to \texttt{peer: Router-NIC} or \texttt{peer: NIC-Proc}.
-To represent more globally associated, such as SMW
-events which can directly affect all components, we define
-a \texttt{supremum} relationship.
-
 \end{enumerate}
 
-
-To support discovery of events propagating over connected or related 
-components our schema includes Architecture tables
-
-At the resolution of log entries 
-
-\texttt{Components} can include the compute and any supporting subsystems,
-such as storage and facilities related elements. For the Cray system
-itself, we define \texttt{node}, \texttt{blade}, \texttt{chassis},
-\texttt{cabinet}, \texttt{router}, \texttt{tile}, \texttt{link}, \texttt{nic},
-\texttt{smw}, and \texttt{other}.
-
-In order to enable dsicovery of events which are either reported on related
-compoentns or that propagate amont components we support the defintion
-of \texttt{architectures}. For the Cray system itself, we define three.
+A few components, such as the SMW affect everything in the system. To represent 
+such global associations we also define
+a \texttt{supremum} relationship.
 
 
 
-
-
-
-
-In the prototype, we define all architectures and relationships,
-however we currently prinipally search the physical topology only
-and support recursive search up and down, including for supremum
-relationships. We are working on tools to better enable search of
-the multiple architecture represenations.
-
-In order to determine the effect of events on jobs, we also
-intend that job data be made availble with the annotations.
-We expect only the current common fields (e.g., starttime,
-endtime, components, etc) exposed in scheulder logs or
-interfaces.
+%In the prototype, we define all architectures and relationships,
+%however we currently prinipally search the physical topology only
+%and support recursive search up and down, including for supremum
+%relationships. We are working on tools to better enable search of
+%the multiple architecture represenations.
+%
+%In order to determine the effect of events on jobs, we also
+%intend that job data be made availble with the annotations.
+%We expect only the current common fields (e.g., starttime,
+%endtime, components, etc) exposed in scheulder logs or
+%interfaces.
 
 
 

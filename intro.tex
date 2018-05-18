@@ -1,30 +1,37 @@
 \section{Introduction}
 \label{s:intro}
 
-TODO introduce the paper. Brief context, and what the paper aims to do
+As systems have become larger and more complex, the volume and variety of 
+log data has become formidable. Also increasing is the need to find insights 
+in that data to troubleshoot system problems and identify root causes and 
+propagation paths of faults, in support of improving system resilience.
 
-...
+To aid efforts to extract meaningful information from log data, the Holistic Measurement Driven Resilience (HMDR)~\cite{HMDRweb} project has as a goal
+the publication of annotated datasets for resilience 
+research. Making log datasets available to researchers is itself a significant
+challenge: the data is large, and diverse in terms of format, storage 
+and access. Data beyond system logs is also valuable: contextual information
+provided by batch system history, maintenance logs and user error reports.
 
-% TOC, in a why-its-here format rather than where-it-is:
-Extracting useful insights from the diverse and scattered assortment of systems 
-logs, monitoring tool outputs and human-provided commentary is not a new 
-problem, so we begin in section~\ref{s:context} by exploring the context of the
-problem to understand why it has not been already solved. From this we infer 
-the requirements of a solution, outlined in section~\ref{s:requirements}. Our 
-approach addresses these requirements and is described in detail in 
-section~\ref{s:solution}, with some illustrative case studies in 
-~\ref{s:examples}.
-
+In this paper we address this challenge by first exploring the context of the
+problem to understand why it is difficult. From this we infer 
+the requirements of a solution, outlined in section~\ref{s:requirements}. Our
+solution is comprised of a machine-readable vocabulary for describing 
+relevant data, a schema for collating and using expert and 
+machine-generated annotations about log data, and some tools to make these 
+accessible to researchers. We describe this in detail in section~\ref{s:solution}. 
+We describe methods used to popluate a sample annotation database in 
+section~\ref{s:proof}, and use it for some illustrative case studies described 
+in section ~\ref{s:examples}.
 
 \section{Context}
 \label{s:context}
 
 To illustrate the opportunities and challenges posed by the assortment of 
-log-and-related data, consider NERSC and Sandia National Laboratory, two of the 
-institutions represented by the authors:
+log-and-related data, consider the NERSC and ACES (LANL/SNL) large-scale computational environments, represented by the authors:
 
 NERSC's Cori system is a Cray XC40 with 2388 Xeon nodes, 9688 Xeon Phi nodes, 
-a host of service nodes providing I/O forwarding, a Datawarp \textcolor{red}{CITE}
+a host of service nodes providing I/O forwarding, a Datawarp
 burst-buffer filesystem, Lustre networking and
 system management, and an Aries high-speed network in a Dragonfly topology. Cori
 has a large external Lustre filesystem also cross-mounted on Edison - another 
@@ -35,14 +42,14 @@ programming environments, Cori runs multiple compilers and MPI stacks and
 hundreds of software packages. Its 7,000 users run tens of thousands of jobs per 
 day via the Slurm batch scheduler.
 
-Sandia and Los Alamos National Laboratory are partners in the management of Trinity, a Cray XC40
-with 9436 Xeon and over 9500 Xeon Phi nodes, a Datawarp burst buffer, Aries HSN
-and Lustre filesystem, and its test systems. Trinity serves the needs to the National Nuclear 
+ACES Trinity is a Cray XC40
+with 9436 Xeon and over 9500 Xeon Phi nodes, a DataWarp burst buffer, Aries HSN
+and a Lustre filesystem. Trinity serves the needs of the National Nuclear 
 Security Administration and has far stricter access limitations than does Cori.
 
-Both are large centers with multiple production and test-bed systems including 
-bleeding-edge technologies and many staff members supporting 
-various aspects of each facility and the several hundred projects and several 
+The associated centers support multiple production and test-bed systems including 
+bleeding-edge technologies and with many staff members who support 
+various aspects of each facility, the several hundred projects and the several 
 thousand users they collectively support.
 
 Data such as system logs, environmental metrics, job history, filesystem state,
@@ -57,7 +64,7 @@ each investigation and is limited by several constraints:
 \item Data is collected in different formats, usually based on the output format
       of specific data sources and the needs of a specific investigation.
 \item Data is stored in different places with different access mechanisms - flat 
-      text files, binary formats including HDF5,~\textcolor{red}{cite} SQL and 
+      text files, binary formats including HDF5, SQL and 
       NoSQL databases, JSON via a RESTful interface, etc.
 \item Not all data is suitable for publication. Log files intersperse entries
       relating to events contributing to some failure with unrelated entries

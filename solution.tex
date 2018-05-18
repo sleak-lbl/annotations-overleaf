@@ -3,8 +3,7 @@
 
 These requirements seem complex and even self-contradictory, but
 computer science has an aphorism: ``We can solve any problem by
-introducing an extra level of indirection''
- \textcolor{red}{cite wikipedia Fundamental theorem of software engineering}
+introducing an extra level of indirection''.
 
 In our solution, metadata provides that level of indirection. 
 Our solution integrates three contributions to address these 
@@ -19,8 +18,8 @@ from data access:
       distributed graph that can be queried to discover relevant collections
       of log-like data and annotations on that data.
       
-\item A schema for publishing annotations for log data, in an SQL
-	  database, also in terms of subject and time period. Annotations 
+\item A schema for publishing annotations for log data, which can be represented in an SQL 
+	  database (or otherwise used to define the query and return fields of an API of a more complex representation)  also in terms of subject and time period. Annotations 
       databases fit neatly into the RDF graph and might contain:
       
 \begin{itemize}
@@ -30,7 +29,7 @@ from data access:
       replacing some failed nodes, so the network was probably disrupted'' 
 \item Machine-generated observations, such as message-pattern frequencies 
       computed by running certain logs through an analysis tool such as 
-      Baler\textcolor{red}{cite}.
+      Baler~\cite{Baler}.
 \end{itemize}
 
 \item A collection of tools to make the RDF vocabulary and annotation 
